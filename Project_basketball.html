@@ -1,0 +1,136 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Project Detail Page</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a class="logo">Predicting Tournament Results</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Project Log</a></li>
+							<li><a href="aboutme.html">About Me</a></li>
+							<li><a href="resume.html">Resume</a></li>
+							<li><a href="contact.html">Contact</a></li>
+							<li class="active"><a href="Project_basketball.html">Project Detail</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="https://www.linkedin.com/in/juandu-00416/" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="https://github.com/jessieDu314" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									<h1>Project Description<br /></h1>
+									
+									<p>In this project, I downloaded college basketball tournament data from Kaggle, <br />
+										which contains cleaned data of previous season's results, team information, tournament introductions, <br />
+										and some additional data that might be useful in predicting the tournament results for the 2022 season.</p>
+								</header>
+								<div class="image main"><img src="images/basketball_1.png" alt="" /></div>
+								<h2>Constructing Dataset</h2>
+								<p>After I downloaded the data, I first did some preliminary research about the tournament rules, how success is measured, and in general, how the team performance is measured. Then, I went through all the files and read the description provided by Kaggle to find out the specific meaning of each variable. Third, based on my understanding of the tournament and the data I have, choose the prediction metric I would like to use in my prediction.</p>
+								<div>
+									First, I chose each team's average score per game and the winning probability for each team in each playing season as my primary prediction measure. 
+									<span class="image main"><img src="images/SPG.png" height="350" width="600" alt="" />
+								</div>
+								<div>
+									Second, I chose several variables directly related to how initiative the team is in each game from the result detail file provided by Kaggle. I used these variables to measure team efficiency and included them as my prediction feature. 
+									<span class="image main"><img src="images/PE.png" height="400" width="600"alt="" />
+								</div>
+								<div>
+									Third, I also think team rank during the playing season is also a helpful feature in terms of predicting game results. I also included some measures of team ranking, including mean, median, and whether the team has ranked up from the first day of the game to the last day in my predicting features.
+									<span class="image main"><img src="images/Rank.png" height="400" width="600" alt="" />
+								</div>
+								<div class="box alt">
+									<div class="row gtr-50 gtr-uniform">
+										After extracting all the features I needed, I constructed a training and testing dataset from the past year's result file and merged my feature into the dataset.
+										<span class="image fit"><img src="images/Train.png" alt="" />
+										<span class="image fit"><img src="images/Test.png" alt="" />
+										
+									</div>
+								</div>
+								<h2>Building Model</h2>
+								<p>
+									Since it is a classification question, I chose to build two models for the prediction and compare the model accuracy, choosing the best one to predict the 2022 result.<br/>
+									The first model I chose is logistic regression with l2 penalty. I chose to use l2 penalty even when I don't have too many predictors because I suspect there might be a multicollinearity issue in my model, and I'd like to avoid such impact.<br/>
+									The second model I choose is a stochastic gradient with early stopping and the loss function after using my training data to train my models and take them to my testing data. The testing accuracy measured by the log loss function is slightly higher, which is about 0.613; so, I chose this model to predict the 2022 results.
+								</p>
+								<div class="image main"><img src="images/submission.png"height="450" width="100" alt="" /></div>
+								<h2>Reflection</h2>
+								<p>
+									I chose to join this Kaggle competition and work on this dataset is not because I'm such a basketball fan. On the contrary, my knowledge of basketball is minimal, and I'd like to train myself to work with something I'm not familiar with since it might be most of the case in the actual workplace. I want to get acquainted with this process, from doing background research to choosing the metric to use and building my own dataset using my data. Finally, select the possible model to deal with the problem.<br/>
+									During this process, it is the first part that I found most challenging; I need to take more time to understand this problem before moving on to the next part. Working on this project actually reminds me of what I need to keep improving next.<br/>
+									Also, about this question itself, due to my limited knowledge about basketball and the time constraint, I couldn't analyze each variable in the file carefully, which means that my model might leave out some valuable features. Also, I just started learning another tool, which is CVM, to make a classification. In the future, I would like to add additional features which I have not used here and try out other models to improve my predicting accuracy.
+								</p>
+								<p><a href="https://github.com/jessieDu314/Project_Log/blob/main/Predicting_Tournament_Results.py" class="logo">>View Code Details</a></p>
+							</section>
+
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+
+					<section class="split contact">
+						<section class="alt">
+							<h3>Location</h3>
+							<p>Waltham, MA<br /></p>
+						</section>
+						<section>
+							<h3>Phone</h3>
+							<p><a href="#">(781) 249-8512</a></p>
+						</section>
+						<section>
+							<h3>Email</h3>
+							<p><a href="mailto:juandu1124@brandeis.edu">juandu1124@brandeis.edu</a></p>
+						</section>
+						<section>
+							<h3>Social</h3>
+							<ul class="icons alt">
+								<li><a href="https://www.linkedin.com/in/juandu-00416/" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
+								<li><a href="https://github.com/jessieDu314" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+							</ul>
+						</section>
+					</section>
+				</footer>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>&copy; Untitled</li><li>Design: <a href="https://html5up.net">JessieDu</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
