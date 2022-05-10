@@ -1,0 +1,761 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Jessie The Analyst Portfolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a class="logo">Predicting Houses Prices on Airbnb</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Project Log</a></li>
+							<li><a href="aboutme.html">About Me</a></li>
+							<li><a href="resume.html">Resume</a></li>
+							<li><a href="contact.html">Contact</a></li>
+							<li class="active"><a href="Project_airbnb.html">Project Detail</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="https://www.linkedin.com/in/juandu-00416/" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="https://github.com/jessieDu314" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<div class="image main"><img src="images/wordcloud1.png" alt="" /></div>
+								<h2>1. Problem Statement</h2>
+								<p>In this project, I was trying to use the information collected from Airbnb building a <b>predictive model</b> to predict house price and compare different regularization methods.
+								   I scraped from Airbnb and constructed a dataset containing 12740 observations and 33 primary predictors.
+								   This is a classic <b>regression problem</b>, I tested regression models using three regularization tools and estimated the testing mean squared to measure the prediction accuracy of the models.
+								</p>
+								<h2>2. Collecting and Pre-processing Data</h2>
+								<h3>2.1 Scraping Data</h3>
+								<p>
+								   There are two steps I took in this stage:<br/>Step I: Find the links for all the available houses of each city
+								</p>
+								   <pre>
+									<code>
+					# SAMPLE CODE #
+# 15 page for each city
+links_to_scrape  = []
+for i in city:
+    for j in range(15):
+        template = "https://www.airbnb.com/s/"+i+"/homes?adults=2&checkin=&checkout=&tab_id=home_tab&refinement_paths%5B%5D=%2Fhomes&flexible_trip_dates%5B%5D=december&flexible_trip_dates%5B%5D=january&flexible_trip_dates%5B%5D=february&flexible_trip_dates%5B%5D=march&date_picker_type=flexible_dates&source=structured_search_input_header&search_type=search_query&flexible_trip_lengths%5B%5D=weekend_trip"
+        if j > 0:
+            more_page = "&items_offset="+str(j*20)+"&section_offset=2"
+            template  = template + more_page                    
+        links_to_scrape.append(template)
+# %%%% scrapping urls
+url_to_scrape = []
+for l in range(len(links_to_scrape)):
+    driver.get(links_to_scrape[l])
+    time.sleep(15)
+    elems = driver.find_elements_by_xpath("//a[@href]")
+    for elem in elems:
+        url_to_scrape.append(elem.get_attribute("href"))
+									</code>
+								</pre>
+								<p>
+									Step II: Find features listed on the website that could be used for prediction
+								</p>
+								<pre>
+									<code>
+					# SAMPLE CODE #
+for url in dta_url.iloc[:,0].to_list():    
+driver.get(url)
+time.sleep(5)
+# date and url        
+houses['scrapping_date'] = datetime.datetime.now()
+houses['url']            = driver.current_url
+# headline
+try:
+	houses['headline'] = driver.find_elements_by_xpath('//div[@class="_b8stb0"]')[0].text
+except:
+	houses['headline'] = ''
+# house type
+try:
+	houses['house_info'] = driver.find_elements_by_xpath('//div[@class="_tqmy57"]')[0].text
+except:
+	houses['house_info'] = ''
+								    </code>
+							    </pre>
+								
+								<h3>2.2 Cleaning Data</h3>
+								<p>
+									In the cleaning step, I first filtered out features I would like to use in building my predicting model, then convert the non-numeric features into numbers, and setting categorical variables as dummy variable.
+									Then, because I would like to include the house's cancel policy and host's join year in my preddictors, I also converted relevant information into date format for my prediction in the next stage.
+								</p>								
+								<pre>	
+									<code>
+					# SAMPLE CODE #
+# cancel policy                                                                                                                                  
+tmp = dta_houses.free_cancel.fillna('NAN')
+tmp = tmp.apply(lambda x: re.sub(r'(for )|(before )',r'',x))
+tmp = tmp.apply(lambda x: re.sub(r'48 hours',r'1',x))
+for i in range(len(tmp)):
+	try:
+		tmp[i] = datetime.strptime(tmp[i],'%b %d').strftime('%m-%d')
+	except:
+		pass
+tmp2 = dta_houses.check_in
+tmp2 = pd.DataFrame(tmp2.apply(lambda x: datetime.strptime(x,'%m/%d/%Y').strftime('%m-%d')))
+tmp2['cancel'] = tmp.copy()
+cancel_window = []
+for i in range(len(tmp2)):
+	try:
+		k = str(datetime.strptime(tmp2['check_in'][i], '%m-%d')-datetime.strptime(tmp2['cancel'][i],'%m-%d'))
+		k = re.findall('([0-9]+ day[s]?)',k)[0]
+	except:
+		k = tmp2['cancel'][i]
+	cancel_window.append(k)
+									</code>
+								</pre>	
+								<p style = "text-align:left;">
+									<h3>2.3 Data Preview</h3>
+									<span style="float:right;">
+										<a href="dataset/dta_airbnb_clean_final.xlsx" download class="logo">Download Full Dataset</a>
+									</span>
+								</p>
+								<iframe width="900" height="282" frameborder="0" scrolling="no" 
+										src="https://onedrive.live.com/embed?resid=88903E3A3771A086%211171&authkey=%21AHgWb2Vmaii4E-U&em=2&wdAllowInteractivity=False&Item='dta_airbnb_clean_final'!A1%3AAL12&wdInConfigurator=True">
+
+								</iframe>
+								<table>
+									<tbody>
+									  	<tr>
+											<td>Number of observations</td>
+											<td>12740</td>
+									  	</tr>
+										<tr>
+											<td>Number of Predictors</td>
+											<td>33</td>
+										</tr>
+										<tr>
+											<td>Number of Rows have at least one missing value</td>
+											<td>4132</td>
+										</tr>
+									</tbody>
+								</table>
+								<h2>3. Fitting Predictive Models</h2>
+								<p>
+									In the following sections, I want to compare how different regularization methods can improve the prediction accuracy in this dataset. 
+									I  fitted a linear regression model as a baseline for comparison, and fitted another models using ridge, lasso and principal 
+									component analysis to reduce the feature numbers, and estimated mean square error to compare the model accuracy. 
+									Because there are missing values in the data, I first dropped all the rows with missing values constructed a smaller dataset to predict house price, 
+									and compared model performance.
+								</p>
+								<h3>3.1 Dropping missing values and constructing prediction models</h3>
+								<p><b>Step I: Variables Preparation</b></br>
+										- Setting dummy variables</br>
+										- Adding interaction terms and higher degree polynomials</br>
+								</p>	
+								<p><b>Step II: Conducting Training-Validation-Testing Split</b></p>
+								<p><b>Step III: Fitting regression models to predict house price and comparing the performance of different redularization methods</b></p>
+								<p>
+									For each regularization model:</br>
+									1. Search through a list of hyperparameters find the one with the lowest prediction error</br>
+									2. Using the best parameter to make predictions and estimate mean squared error on the final test data to compare model accuracy
+								</p>
+
+								<!-- Photo gallery -->
+								<meta name="viewport" content="width=device-width, initial-scale=1">
+								<style>
+									body {
+									font-family: Arial;
+									margin: 0;
+									}
+									* {
+									box-sizing: border-box;
+									}
+									img {
+									vertical-align: middle;
+									}
+									/* Position the image container (needed to position the left and right arrows) */
+									.container {
+									position: relative;
+									}
+									/* Hide the images by default */
+									.mySlides {
+									display: none;
+									}
+									/* Add a pointer when hovering over the thumbnail images */
+									.cursor {
+									cursor: pointer;
+									}
+									/* Next & previous buttons */
+									.prev,
+									.next {
+									cursor: pointer;
+									position: absolute;
+									top: 40%;
+									width: auto;
+									padding: 16px;
+									margin-top: -50px;
+									color: white;
+									font-weight: bold;
+									font-size: 20px;
+									border-radius: 0 3px 3px 0;
+									user-select: none;
+									-webkit-user-select: none;
+									}
+									/* Position the "next button" to the right */
+									.next {
+									right: 0;
+									border-radius: 3px 0 0 3px;
+									}
+									/* On hover, add a black background color with a little bit see-through */
+									.prev:hover,
+									.next:hover {
+									background-color: rgba(0, 0, 0, 0.8);
+									}
+									/* Number text (1/3 etc) */
+									.numbertext {
+									color: #f2f2f2;
+									font-size: 12px;
+									padding: 8px 12px;
+									position: absolute;
+									top: 0;
+									}
+									/* Container for image text */
+									.caption-container {
+									text-align: center;
+									background-color: #222;
+									padding: 2px 16px;
+									color: white;
+									}
+									.row:after {
+									content: "";
+									display: table;
+									clear: both;
+									}
+									/* Six columns side by side */
+									.column {
+									float: left;
+									width: 16.66%;
+									}
+									/* Add a transparency effect for thumnbail images */
+									.demo {
+									opacity: 0.6;
+									}
+									.active,
+									.demo:hover {
+									opacity: 1;
+									}
+								</style>
+								<p style="text-align:center"><b>Tuning hyperparameters</b></p>
+								<div class="container" >
+									<div class="mySlides">
+										<div class="numbertext">1 / 6</div>
+										<img src="images/dropNA_ridge1.png" style="width:60%;text-align: center" >
+									</div>
+									<div class="mySlides">
+										<div class="numbertext">2 / 6</div>
+										<img src="images/dropNA_ridge2.png" style="width:60%;text-align: center" >
+									</div>
+									<div class="mySlides">
+										<div class="numbertext">3 / 6</div>
+										<img src="images/dropNA_lasso1.png" style="width:60%;text-align: center" >
+									</div>
+									<div class="mySlides">
+										<div class="numbertext">4 / 6</div>
+										<img src="images/dropNA_lasso2.png" style="width:60%;text-align: center" >
+									</div>
+									<div class="mySlides">
+										<div class="numbertext">5 / 6</div>
+										<img src="images/dropNA_pca1.png" style="width:60%;text-align: center" >
+									</div>
+									<div class="mySlides">
+										<div class="numbertext">6 / 6</div>
+										<img src="images/dropNA_pca2.png" style="width:60%;text-align: center" >
+									</div>
+									
+									<a class="prev" onclick="plusSlides(-1)">❮</a>
+									<a class="next" onclick="plusSlides(1)">❯</a>
+
+									<div class="caption-container">
+										<p id="caption"></p>
+									</div>
+
+									<div class="row">
+										<div class="column">
+										<img class="demo cursor" src="images/dropNA_ridge1.png" style="width:100%" onclick="currentSlide(1)" alt="Ridge">
+										</div>
+										<div class="column">
+										<img class="demo cursor" src="images/dropNA_ridge2.png" style="width:100%" onclick="currentSlide(2)" alt="Ridge">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/dropNA_lasso1.png" style="width:100%" onclick="currentSlide(3)" alt="Lasso">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/dropNA_lasso2.png" style="width:100%" onclick="currentSlide(4)" alt="Lasso">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/dropNA_pca1.png" style="width:100%" onclick="currentSlide(5)" alt="PCA">
+										</div>    
+										<div class="column">
+											<img class="demo cursor" src="images/dropNA_pca2.png" style="width:100%" onclick="currentSlide(6)" alt="PCA">
+										</div>
+									</div>
+								</div>
+								<script>
+									let slideIndex = 1;
+									showSlides(slideIndex);
+
+									function plusSlides(n) {
+									showSlides(slideIndex += n);
+									}
+
+									function currentSlide(n) {
+									showSlides(slideIndex = n);
+									}
+
+									function showSlides(n) {
+									let i;
+									let slides = document.getElementsByClassName("mySlides");
+									let dots = document.getElementsByClassName("demo");
+									let captionText = document.getElementById("caption");
+									if (n > slides.length) {slideIndex = 1}
+									if (n < 1) {slideIndex = slides.length}
+									for (i = 0; i < slides.length; i++) {
+										slides[i].style.display = "none";
+									}
+									for (i = 0; i < dots.length; i++) {
+										dots[i].className = dots[i].className.replace(" active", "");
+									}
+									slides[slideIndex-1].style.display = "block";
+									dots[slideIndex-1].className += " active";
+									captionText.innerHTML = dots[slideIndex-1].alt;
+									}
+								</script>
+									
+								<pre>
+									<code>
+				# SAMPLE CODE --- Ridge Regression #
+alpha_range = [100, 150, 200, 500, 1000, 2000, 3000, 4000, 6000, 8000, 10000]
+alpha_range = [*range(1000, 3020, 50)]
+
+emspe = []
+for a in alpha_range: 
+	mspe_list = []
+	for r in range(10):        
+		x_train = dta_reg_std[dta_reg_std.ML_group != r].iloc[:,1:-1].to_numpy()
+		y_train = dta_reg_std[dta_reg_std.ML_group != r].iloc[:,0].to_list()
+		x_val   = dta_reg_std[dta_reg_std.ML_group == r].iloc[:,1:-1].to_numpy()
+		y_val   = dta_reg_std[dta_reg_std.ML_group == r].iloc[:,0].to_list()
+		clf     = Ridge(alpha = a,fit_intercept=False).fit(x_train, y_train)
+		y_pred  = clf.predict(x_val) 
+		mspe    = np.mean(np.square(y_val-y_pred))
+		mspe_list.append(mspe)
+	emspe.append(np.mean(mspe_list))
+
+ridge_lambda = alpha_range[emspe.index(min(emspe))]
+
+# predict using ridge
+ridge_model = Ridge(alpha = ridge_lambda,fit_intercept=False).fit(X_t, Y_t)
+ridge_pred  = ridge_model.predict(X_test)
+ridge_mspe  = np.mean(np.square(Y_test - ridge_pred))
+								    </code>
+							    </pre>
+								<p><b>Step IV: Model Comparison</b></p>
+								<table>
+									<tbody>
+									  	<tr>
+											<td></td>
+											<td><b>Model</b></td>
+											<td><b>Shrinkage Parameter</b></td>
+											<td><b>Testing Error</b></td>
+											<td><b>Predictors</b></td>
+											<td><b>Sample Size</b></td>
+									  	</tr>
+										<tr>
+											<td>0</td>
+											<td>OLS</td>
+											<td></td>
+											<td>2.19E+23</td>
+											<td>2897</td>
+											<td>8608</td>
+										</tr>
+										<tr style="background-color: lightblue">
+											<td>1</td>
+											<td>Ridge</td>
+											<td>1650</td>
+											<td>798.83</td>
+											<td>2897</td>
+											<td>8608</td>
+										</tr>
+										<tr>
+											<td>2</td>
+											<td>Lasso</td>
+											<td>0.56</td>
+											<td>930.08</td>
+											<td>2897</td>
+											<td>8608</td>
+										</tr>
+										<tr>
+											<td>3</td>
+											<td>PCR</td>
+											<td>2</td>
+											<td>4271.84</td>
+											<td>2897</td>
+											<td>8608</td>
+										</tr>
+									</tbody>
+								</table>
+								<p>
+									Given the smaller dataset, ridge regression produces the best prediction with a mean squared error of 798.8. 
+									However, there's a problem in these models, which I'll discuss in the next section.
+								</p>
+								<h3>3.2 Filling missing values</h3>
+								<p>
+									<b>Step I: Identify Features with Missing Values </b></br>
+									Five of the predicting fratures have missing values, which are House setting, Response type, Additional fees, Rating and Review numbers.
+									Given the characteristics of the features with missing values, I used two machine learning techniques fill the missing values.
+								</p>
+								<p><b>Step II: Define functions to fill missing values </b></p>
+								
+								<meta name="viewport1" content="width=device-width, initial-scale=1">
+								<style>
+									body {
+									font-family: Arial;
+									margin: 0;
+									}
+									* {
+									box-sizing: border-box;
+									}
+									img {
+									vertical-align: middle;
+									}
+									.container1 {
+									position: relative;
+									}
+									.mySlides1 {
+									display: none;
+									}
+									.cursor {
+									cursor: pointer;
+									}
+									.prev,
+									.next {
+									cursor: pointer;
+									position: absolute;
+									top: 40%;
+									width: auto;
+									padding: 16px;
+									margin-top: -50px;
+									color: white;
+									font-weight: bold;
+									font-size: 20px;
+									border-radius: 0 3px 3px 0;
+									user-select: none;
+									-webkit-user-select: none;
+									}
+									.next {
+									right: 0;
+									border-radius: 3px 0 0 3px;
+									}
+									.prev:hover,
+									.next:hover {
+									background-color: rgba(0, 0, 0, 0.8);
+									}
+									.numbertext {
+									color: #f2f2f2;
+									font-size: 12px;
+									padding: 8px 12px;
+									position: absolute;
+									top: 0;
+									}
+									.caption-container1 {
+									text-align: center;
+									background-color: #222;
+									padding: 2px 16px;
+									color: white;
+									}
+									.row:after {
+									content: "";
+									display: table;
+									clear: both;
+									}
+									.column {
+									float: left;
+									width: 14%;
+									}
+									.demo {
+									opacity: 0.6;
+									}
+
+									.active,
+									.demo:hover {
+									opacity: 1;
+									}
+								</style>
+								
+								<p style="text-align:center"><b>Tuning hyperparameters</b></p>
+								<div class="container1" >
+									<div class="mySlides1">
+										<div class="numbertext">1 / 7</div>
+										<img src="images/fill_pca_response.png" style="width:60%;text-align: center" >
+									</div>
+									<div class="mySlides1">
+										<div class="numbertext">2 / 7</div>
+										<img src="images/fill_pca_sub_ratings.png" style="width:60%;text-align: center" >
+									</div>
+									<div class="mySlides1">
+										<div class="numbertext">3 / 7</div>
+										<img src="images/fill_knn_cleanfee.png" style="width:60%;text-align: center" >
+									</div>
+											
+									<div class="mySlides1">
+										<div class="numbertext">4 / 7</div>
+										<img src="images/fill_knn_greview.png" style="width:60%;text-align: center" >
+									</div>
+								
+									<div class="mySlides1">
+										<div class="numbertext">5 / 7</div>
+										<img src="images/fill_knn_occufee.png" style="width:60%;text-align: center" >
+									</div>
+											
+									<div class="mySlides1">
+										<div class="numbertext">6 / 7</div>
+										<img src="images/fill_knn_review_number.png" style="width:60%;text-align: center" >
+									</div>
+									<div class="mySlides1">
+										<div class="numbertext">7 / 7</div>
+										<img src="images/fill_knn_servicefee.png" style="width:60%;text-align: center" >
+									</div>
+									
+									<a class="prev" onclick="plusSlides(-1)">❮</a>
+									<a class="next" onclick="plusSlides(1)">❯</a>
+
+									<div class="caption-container1">
+										<p id="caption"></p>
+									</div>
+
+									<div class="row">
+										<div class="column">
+										<img class="demo cursor" src="images/fill_pca_response.png" style="width:80%" onclick="currentSlide(1)" alt="PCA: response rate">
+										</div>
+										<div class="column">
+										<img class="demo cursor" src="images/fill_pca_sub_ratings.png" style="width:80%" onclick="currentSlide(2)" alt="PCA: sub-ratings">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/fill_knn_cleanfee.png" style="width:80%" onclick="currentSlide(3)" alt="KNN: cleaning fee">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/fill_knn_greview.png" style="width:80%" onclick="currentSlide(4)" alt="KNN: general review">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/fill_knn_occufee.png" style="width:80%" onclick="currentSlide(5)" alt="KNN: occupancy fee">
+										</div>    
+										<div class="column">
+											<img class="demo cursor" src="images/fill_knn_review_number.png" style="width:80%" onclick="currentSlide(6)" alt="KNN review number">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/fill_knn_servicefee.png" style="width:80%" onclick="currentSlide(7)" alt="KNN: service fee">
+										</div>
+									</div>
+								</div>
+
+								<script>
+									let slideIndex1 = 1;
+									showSlides(slideIndex1);
+
+									function plusSlides(n) {
+									showSlides(slideIndex1 += n);
+									}
+
+									function currentSlide(n) {
+									showSlides(slideIndex1 = n);
+									}
+
+									function showSlides(n) {
+									let i;
+									let slides = document.getElementsByClassName("mySlides1");
+									let dots = document.getElementsByClassName("demo");
+									let captionText = document.getElementById("caption");
+									if (n > slides.length) {slideIndex1 = 1}
+									if (n < 1) {slideIndex1 = slides.length}
+									for (i = 0; i < slides.length; i++) {
+										slides[i].style.display = "none";
+									}
+									for (i = 0; i < dots.length; i++) {
+										dots[i].className = dots[i].className.replace(" active", "");
+									}
+									slides[slideIndex1-1].style.display = "block";
+									dots[slideIndex1-1].className += " active";
+									captionText.innerHTML = dots[slideIndex1-1].alt;
+									}
+								</script>
+								<pre>
+									<code>
+				# SAMPLE CODE --- Impute Using PCA #
+def fillMissingPCA(tmp,m):
+tmp_hat      = tmp.fillna(0).copy()
+objective    = []
+tmp_hat_list = []
+for i in range(11):    
+	pca = PCA(n_components=m)
+	pca.fit(tmp_hat.iloc[:,0:-1])
+	l = pca.components_
+	z = pca.fit_transform(tmp_hat.iloc[:,0:-1])    
+	pred = pd.DataFrame(np.matmul(z,l))
+	obj = np.sum(np.square(tmp.iloc[:,0:-1][tmp_hat.index_na == 0].values - 
+							pred.iloc[tmp[tmp_hat.index_na    == 0].index].values))
+	objective.append(obj)
+	tmp_hat_list.append(tmp_hat.copy())
+
+	for j in range(tmp_hat.shape[0]):
+		for k in range(tmp_hat.shape[1]-1):
+			if str(tmp.iloc[j][k]) == 'nan':                
+				tmp_hat.iloc[j,k] = pred.iloc[j][k].copy()
+return (objective,tmp_hat_list)
+								    </code>
+							    </pre>
+								<p style = "text-align:left;">
+									<b>Data Preview</b>
+									<span style="float:right;">
+										<a href="dataset/dta_airbnb_full.csv" download class="logo">Download Full Dataset</a>
+									</span>
+								</p>
+								<iframe width="900" height="282" frameborder="0" scrolling="no" 
+										src="https://onedrive.live.com/embed?resid=88903E3A3771A086%211175&authkey=%21AMFPyZHQ1GyBge8&em=2&wdAllowInteractivity=False&Item='in'!A1%3AAP12&wdInConfigurator=True">
+								</iframe>
+								<h3>3.3 Fitting Predictive Models On The Full Dataset</h3>
+								<p>
+									After filling the missing values, I repeated the previous steps of building regression models using three regularization parameters,
+									following are the results of the four models.</br>
+									<table>
+										<tbody>
+											<tr>
+												<td></td>
+												<td><b>Model</b></td>
+												<td><b>Shrinkage Parameter</b></td>
+												<td><b>Testing Error</b></td>
+												<td><b>Predictors</b></td>
+												<td><b>Sample Size</b></td>
+											</tr>
+											<tr>
+												<td>0</td>
+												<td>OLS</td>
+												<td></td>
+												<td>2.23E+22</td>
+												<td>2897</td>
+												<td>12740</td>
+											</tr>
+											<tr>
+												<td>1</td>
+												<td>Ridge</td>
+												<td>850</td>
+												<td>1391.80</td>
+												<td>2897</td>
+												<td>12740</td>
+											</tr>
+											<tr style="background-color: lightblue">
+												<td>2</td>
+												<td>Lasso</td>
+												<td>0.07</td>
+												<td>1350.31</td>
+												<td>2897</td>
+												<td>12740</td>
+											</tr>
+											<tr>
+												<td>3</td>
+												<td>PCR</td>
+												<td>1</td>
+												<td>4573.31</td>
+												<td>2897</td>
+												<td>12740</td>
+											</tr>
+										</tbody>
+									</table>
+								</p>
+								<h2>4. Discussion</h2>
+								<p>
+									<b>Conclusion: </b>The Optimal model is lasso regression with a lambda of 0.07</br>
+									I also compared the results from that in section 3.1 and have found some interesting behaviors. The first thing that caught my attention is the testing errors for the regression models 
+									fitted on the full dataset are actually higher than using the smaller dataset, which is something felt quite unusual to me. As far as I am concerning, using almost
+									4000 more data to fit the model is expected to give better result in terms of prediction accuracy. While the idea of the missing values I filled brought more unpredictability
+									into the dataset, I think using machine learning to fill the missing value is a resonable approach. So, to find out the reasons for such discrepancies, I took a closer look at the 
+									previous models built on the smaller dataset, and I believe I have found some possible explanations for this question.</br>
+									
+									<span class="image left"><img src="images/dropNA_ridge2.png" width="370" alt="" /></span>
+									The table on the left showed the plot of the <b>validation error</b> which I used to choose the best hyperparameter for lasso regression, we can see that the lowest point has a mean squared error
+									at around 1160. However, if we go back looking at the table summary in 3.1, we'll see that the final test error is actually smaller than validation error. I assume that this is because compared 
+									with the number of predictors, the sample size is too small, the prediction models did not learn anything from the training data, the results are biased. After filling the missing values, 
+									we have a higher testing error that is slightly lower than the validation error, indicting a more robust model that can be used to predict price, also the regularization effects of the latter models
+									are more reliable.</br>
+									<span class="image left"><img src="images/pca_variance.png" width="370" alt="" /></span>
+									Another interesting thing I found in my model is that regardless of the dataset I use, PCR is always the worst model with the highest predicting errors. I was curious about the result, so I made another plot
+									showing the <b>ration of explained variation by each component</b> for the PCR using full dataset. We can see that the first component only explains 0.04% of the variation in the explanatory variables. 
+									My hypothesis is that under such circumstance, it might be a bit hard for principal component analysis to find a small number of components that can explain a relatively large amount of variance for the data I have,
+									which may be the reason why PCR gives the largest testing error compared with other two models.
+								</p>
+								<p>
+									<a href="https://github.com/jessieDu314/Project_Log/tree/main/Predicting_House_Price" class="logo">>View Code Details</a>
+								</p>
+							</section>
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+
+					<section class="split contact">
+						<section class="alt">
+							<h3>Location</h3>
+							<p>Waltham, MA<br /></p>
+						</section>
+						<section>
+							<h3>Phone</h3>
+							<p>(781) 249-8512</p>
+						</section>
+						<section>
+							<h3>Email</h3>
+							<p><a href="mailto:juandu1124@brandeis.edu">juandu1124@brandeis.edu</a></p>
+						</section>
+						<section>
+							<h3>Social</h3>
+							<ul class="icons alt">
+								<li><a href="https://www.linkedin.com/in/juandu-00416/" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
+								<li><a href="https://github.com/jessieDu314" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+							</ul>
+						</section>
+					</section>
+				</footer>
+
+				<!-- Copyright -->
+				<div id="copyright">
+					<ul><li>Design: <a href="https://html5up.net">JessieDu</a></li></ul>
+				</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
