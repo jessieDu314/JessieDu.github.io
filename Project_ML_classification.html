@@ -1,0 +1,293 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Project Detail Page</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a class="logo">Binary Classification Problem</a>
+					</header>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Project Log</a></li>
+							<li><a href="aboutme.html">About Me</a></li>
+							<li><a href="resume.html">Resume</a></li>
+							<li><a href="contact.html">Contact</a></li>
+							<li class="active"><a href="Project_basketball.html">Project Detail</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="https://www.linkedin.com/in/juandu-00416/" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="https://github.com/jessieDu314" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<header class="major">
+									
+								</header>
+								<div class="image main"><img src="images/heart.jpg" alt="" /></div>
+								<h2>Project Description<br /></h2>
+									<p>
+										In this project, we downloaded heart disease data from Kaggle,the original data come from 2020 annual CDC survey data of 400k adults related to their health status. The data available on Kaggle contains over 300,000 records and 18 selected columns from the original data source, 
+										which includes Heart Disease Condition, BMI, Age, Mental Health among others. We plan to use this data build a <b>predictive model</b> to diagnose whether the person has heart disease. 
+										This is a <b>binary classification</b> problem, we first tested several classification models and based on the classification accuracy choosing the most appropriate one on this dataset. In the second part, we discussed the effect of building a model combination using voting to make classification.
+										More details about the dataset can be found on the Kaggle site, <a href="https://www.kaggle.com/datasets/kamilpytlak/personal-key-indicators-of-heart-disease">here</a>.
+									</p>
+								<h2>Data Preview</h2>
+								<section class="data">
+									<p style = "text-align:left;">
+										<span style="float:right;">
+											<a href="https://www.kaggle.com/datasets/kamilpytlak/personal-key-indicators-of-heart-disease" download class="logo">Download Full Dataset</a>
+											
+										</span>
+										<div class="container;">
+											<iframe width="900" height="290" frameborder="0" scrolling="no" 
+											src="https://onedrive.live.com/embed?resid=88903E3A3771A086%211179&authkey=%21ADRhB7drKo_W0HE&em=2&wdAllowInteractivity=False&Item='in'!A1%3AR16&wdInConfigurator=True&wdInConfigurator=True&edesNext=false&ejss=false" style="width: 100%; ">
+											</iframe>
+										</div>
+									</p>
+								</section>
+								<h2>Explanatory Analysis</h2>
+								<div>
+									<h3>Target variable</h3>
+									<img src="images/heart1.png" style="width: 60%" alt="" />
+									<p>
+										From the count plot above, we can see that this dataset is extremely unbalanced. There are only less than 1% of the observations in our dataset have heart disease. 
+										If we use this dataset directly, it's highly possible that the classification accuracy for our models are high due to this asymmetry; however, this high accuracy cannot  
+										reflect our model performance truthfully. So, we will construct a balanced dataset to fit our models. 
+									</p>
+								</div>
+								<div>
+									<h3>Predicting Predictors</h3>
+									<p>
+										To visually see how the predicting variables in the dataset might affect the number of people having heart disease, we first divided our predictors into categorical ones and numeric ones. 
+										For the categorical variables, we made a frequency plot; and for the numeric ones, we made a density plot to show its potential impact.
+									</p>
+									<img src="images/heart2.png" style="width: 90%" alt="" />
+									<p>
+										From the bar plot above, we can see that for most of the categorical predictors, there's a clear difference of the fraction of people having heart disease within each catrgory respectively. 
+										For example, there seems to have a positive relationship between age and heart disease. And if the person has other disease, for instance stroke, or kidney disease, the possibility of having heart disease seems to be higher than healthy people.
+									</p>
+									<img src="images/heart3.png" style="width: 90%" alt="" />
+									<p>
+										We have four numeric variables in the dataset, from the density plot, we can see that people have a higher BMI tends to have a higher ratio of having heart disease. 
+										The relationship between physical health, mental health and sleep time with the the probability of having heart disease looks like negative.
+									</p>
+								</div>
+								<h2>Data Preprocess</h2>
+								<div>
+									<h3>Undersampling to construct balanced dataset</h3>
+									<p>
+										Due to the restrictions of our laptop's processing power, we only selected about 5000 records to train our models in this study. 
+										First, we randomly select 1% of the data from the group of people having heart disease, and using the undersampling technique to build a balanced dataset for the following study.
+									</p>
+									<img src="images/heart4.png" style="width: 60%" alt="" />
+								</div>
+								<div>
+									<h3>Create dummy variables and train-test split</h3>
+									<p>
+										We used one hot encoding to convert all of the categorical variables in our dataset into a form to make sure our machine learning model could do a better job in classification.
+										Then from the data we selected, we filtered out 25% of the data as testing sample to compare the model performance.
+									</p>
+								</div>
+								<h2>Classification Models</h2>
+								<div>
+									<p>
+										We built five individual classfication models to making predictions. For each model, we used grid search(randomized search to increasing searching speed for Random Forest) to find the optimal 
+										parameters, recorded the training accuracy, validation accuracy and computing time when training the model. And tested our model on the the 25% of data we left out to find the testing accuracy.
+										Finally, we combined several models together using voting technique can discussed the results of using the combined model for classification.
+									</p>
+									<table>
+										<caption><b>Training and Testing Results for Individual Classifiers</b></caption>
+										<tbody>
+											<tr>
+												<td><b>Models</b></td>
+												<td><b>Training Accuracy</b></td>
+												<td><b>Validation Accuracy</b></td>
+												<td><b>Parameters</b></td>
+												<td><b>Training Time</b></td>
+												<td><b>Testing Accuracy</b></td>
+											</tr>
+											<tr>
+												<td>KNN</td>
+												<td>0.9998</td>
+												<td>0.7347</td>
+												<td>k=84</td>
+												<td>142.1403</td>
+												<td>0.7421</td>
+											</tr>
+											<tr >
+												<td>SDG(loss=log)</td>
+												<td>0.7603</td>
+												<td>0.7554</td>
+												<td><span>&#945;</span>=0.0041</td>
+												<td>3.5986</td>
+												<td>0.7523</td>
+											</tr>
+											<tr>
+												<td>Random Forest</td>
+												<td>0.7931</td>
+												<td>0.7407</td>
+												<td>max_depth=8<br/>max_features=7<br/>n_estimators=79</td>
+												<td>56.1054</td>
+												<td>0.7538</td>
+											</tr>
+											<tr>
+												<td>Gradient Boosting</td>
+												<td>0.7830</td>
+												<td>0.7587</td>
+												<td>max_depth=3<br/>max_features=10</td>
+												<td>21.2660</td>
+												<td>0.7816</td>
+											</tr>
+											<tr  style="background-color: rgb(247, 230, 204)">
+												<td>Support Vector Machine</td>
+												<td>0.7854</td>
+												<td>0.7592</td>
+												<td>C=0.5<br/>gamma=0.1</td>
+												<td>1061.3845</td>
+												<td>0.7830</td>
+											</tr>
+										</tbody>
+									</table>
+									<ul>
+										<li style = "text-align:justify;">
+											As we can see from the output above, except from the logistic classification, the testing scores for the rest four models are actually higher than the validation score.
+											We think this might happen because in the training step, each time, we only use part of the training set to fit the model and validate using the data left behind. However, in the testing step, we used the whole training sample to fit our model. 
+											With more data to fit the model, it's possible to have better accuracy.
+										</li>
+										<li style = "text-align:justify;">
+											Based on the testing accuracy, we should choose SVM to make the classification for this dataset. However, it took the longest in the training stage. And that is the time required for training on 1% data of the original dataset. 
+											Next-best is the Gradient Boosting model, with an accuracy of 0.7816 and a much shorter computing time. 
+											This has brought us to think that if we combine the other algorithms that run faster than SVC with the Gradient Boosting model using soft voting, can we find a combination that will beat the  Support Vector Classifier? 
+											The results are listed below.
+										</li>
+									</ul>
+									<table>
+										<caption><b>Testing Results for Model Combinations</b></caption>
+										<tbody>
+											<tr>
+												<td><b>Models Combo(2)</b></td>
+												<td><b>Testing Accuracy</b></td>
+												<td><b>Model Combo(3)</b></td>
+												<td><b>Testing Accuracy</b></td>
+											</tr>
+											<tr>
+												<td>GBC+KNN</td>
+												<td>0.7706</td>
+												<td>GBC+KNN+Logit</td>
+												<td>0.7779</td>
+											</tr>
+											<tr >
+												<td>GBC+Logit</td>
+												<td>0.7772</td>
+												<td>GBC+KNN+Forest</td>
+												<td>0.7750</td>
+											</tr>
+											<tr>
+												<td>GBC+Forest</td>
+												<td>0.7764</td>
+												<td style="background-color: rgb(247, 230, 204)">GBC+Logit+Forest</td>
+												<td style="background-color: rgb(247, 230, 204)">0.7859</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div>
+									<h2>SUper Test and Final Conclusion</h2>
+									<p>
+										Of the six combinations we have tested, the last one, built using Gradient Boosting, Logistic Regression, and Random Forest has successfully improved the classification accuracy compared with the SVM Classifier.
+										Finally, we used the same technique in the preprocess step built a super testing sample. By doing so, we hope to be able to assess the model accuracy on the cleaning data that our model has never seen before.
+										In addition, we created two ROC curves to visualize the difference between the two model's accuracy.
+									</p>
+									<p style = "text-align:left;">
+										
+										<ul style="float:right;">
+											<b>Testing Score:</b>
+											<li style = "text-align:justify;">
+												Model Combo: 0.7820
+											</li>
+											<li style = "text-align:justify;">
+												SVM: 0.7824
+											</li>
+										</ul>
+										<img src="images/heart5.png" style="width: 60%;" alt="ROC Curve"/>
+									</p>
+									<p>
+										Simply look at the testing score, we have to announce that SVM wins again in the final test.<br/>
+										But the two scores are rather close, with a slightly difference at the fourth decimal point. And if we look at the ROC curve,
+										we can barely see the difference between the two model's performance. 
+										As such, since we are dealing with a large dataset and computing time should be considered as a key performance indicator, we would 
+										recommend using the combined model to make classification rather using the SVM Classifier.<br/>
+									</p>
+								</div>
+
+								<p><a href="https://github.com/jessieDu314/Project_Log/blob/main/Final_project.ipynb" class="logo">>View Code Details</a></p>
+							</section>
+
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+
+					<section class="split contact">
+						<section class="alt">
+							<h3>Location</h3>
+							<p>Waltham, MA<br /></p>
+						</section>
+						<section>
+							<h3>Phone</h3>
+							<p><a href="#">(781) 249-8512</a></p>
+						</section>
+						<section>
+							<h3>Email</h3>
+							<p><a href="mailto:juandu1124@brandeis.edu">juandu1124@brandeis.edu</a></p>
+						</section>
+						<section>
+							<h3>Social</h3>
+							<ul class="icons alt">
+								<li><a href="https://www.linkedin.com/in/juandu-00416/" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
+								<li><a href="https://github.com/jessieDu314" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+							</ul>
+						</section>
+					</section>
+				</footer>
+
+				<!-- Copyright -->
+					<div id="copyright">
+						<ul><li>Design: <a href="https://www.linkedin.com/in/juandu-00416/">JessieDu</a></li></ul>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
