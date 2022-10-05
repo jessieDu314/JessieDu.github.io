@@ -2035,6 +2035,21 @@ input, select, textarea {
 
 		}
 
+/* Side by side align image */
+	* {
+		box-sizing: border-box;
+	  }
+	  
+	  .imagerow {
+		display: flex;
+	  }
+	  
+	  /* Create three equal columns that sits next to each other */
+	  .imagecolumn {
+		flex: 50%;
+		padding: 10px;
+	  }
+
 /* Box */
 
 	.box {
