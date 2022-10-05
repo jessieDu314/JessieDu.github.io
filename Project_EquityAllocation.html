@@ -1,0 +1,1071 @@
+<!DOCTYPE HTML>
+<!--
+	Massively by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Jessie The Analyst Portfolio</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Header -->
+					<header id="header">
+						<a class="logo">Commodity Indicator on Equity Allocation</a>
+						<p >
+							By: Jessie(Juan) Du, Yue Chen, Gregorio Olmedo
+						</p>
+					</header>
+					
+				<!-- Nav -->
+					<nav id="nav">
+						<ul class="links">
+							<li><a href="index.html">Project Log</a></li>
+							<li><a href="aboutme.html">About Me</a></li>
+							<li><a href="resume.html">Resume</a></li>
+							<li><a href="contact.html">Contact</a></li>
+							<li class="active"><a href="Project_EquityAllocation.html">Project Detail</a></li>
+						</ul>
+						<ul class="icons">
+							<li><a href="https://www.linkedin.com/in/juandu-00416/" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
+							<li><a href="https://github.com/jessieDu314" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+						</ul>
+					</nav>
+
+				<!-- Main -->
+					<div id="main">
+
+						<!-- Post -->
+							<section class="post">
+								<div class="image main"><img src="images/monthly_port.png" alt=""/></div>
+
+								<!-- Introduction part -->
+								<h2 style="text-align: center;">Part I: Project Overview</h2>
+								<p>
+									In this project, we are asked to discuss the impact of commodity factors on US equity sector allocation. Specifically, how to use commodity index and other factors such as the US ISM Manufacturing PM, US Dollar Index to help us build a portfolio performing better than the benchmark index, S&P 500. <br/>
+									<ul class="alt">
+										There are primarily four goals for this project:
+										<li style = "text-align: justify;">Investigate the relationship between each factor candidate and how each factor would impact the sector return. </li>
+										<li style = "text-align: justify;">Use the commodity index and other related factors to build regression models to forecast returns of all the sectors included in the S&P 500. Then, based on the predicted return, we adjusted the weight for these sectors and construct several portfolios seeking to provide returns that can outperform the benchmark index.</li>
+										<li style = "text-align: justify;">Explore non-traditional machine learning technique, specifically decision tree model to forecast sector returns and discuss the effectiveness and efficiency of incorporating machine learning techniques in our analysis.</li>
+										<li style = "text-align: justify;">Use a set of criteria for each strategy specification and backtest our results. Make decisions about the optimal investment strategy and discuss the potential limitations in our research and future study direction.</li>
+									</ul>
+								</p>
+								
+
+								<!-- Data preview -->
+								<h2 style="text-align: center;">Part II: Data Description and Preprocessing</h2>
+								<p>
+									We downloaded S&P 500 sectors historical monthly data from Yahoo Finance, from <b>1995-01 to 2022-04</b>. Among which, the real estate sector only began from 2002-11-02. To keep as much data as possible and to simplify the research process, we downloaded the US REIT index from Nareit to fill all the null values in the real estate sector. </br>
+									Then we downloaded the monthly US Dollar index(DXY) and Bloomberg Commodity index(BCOM) from Factset. Finally, from Bloomberg, we downloaded the Consumer Price Index(CPI) and Purchasing Managers Index(PMI). When merging the five single datasets, we lagged CPI for one month considering the fact that we may not acquire such data by the time other indexes are published. 
+									Also, we adjusted S&P 500 sector data, which is recorded at the beginning of each year, to the appropriate date index. </br>
+									After having all raw data prepared, we calculated monthly percentage change for all indexes for our following analysis. Table 1 below shows the full merged dataset. 
+									<section class="data">
+										<p style = "text-align:left;">
+											Data Preview
+											<span style="float:right;">
+												<a href="dataset/FP_FullData.csv" download class="logo">Download Full Dataset</a>
+											</span>
+											<div class="container;">
+												
+												<iframe 
+													width="700" height="316" frameborder="0" scrolling="no" 
+													src="https://onedrive.live.com/embed?resid=88903E3A3771A086%211186&authkey=%21AIKwBw4cqefHsDE&em=2&wdAllowInteractivity=False&Item='in'!A1%3AP13&wdInConfigurator=True&wdInConfigurator=True&edesNext=false&resen=false" style="width: 100%; ">
+
+												</iframe>
+											</div>
+										</p>
+									</section>
+								</p>
+								<p>
+									<a href="https://github.com/jessieDu314/Project_Log/blob/main/Equity%20Allocation/Data_Preprocess.py" class="logo">>View Code Details for Data Preprocess</a>
+								</p>
+
+								<!-- Correlation -->
+								<h2 style="text-align: center;">Part III: Correlational Research</h2>
+								<h3>3.1 Full Correlation</h3>
+								<p>
+									We first created a matrix for the correlation between each pair of variables across the whole time period. With the complete dataframe, we could actually find the different correlations between the variables such as the sector returns, the precentage change of PMI index, 
+									CPI index, BCOM index and DXY index. The correlations are shown in the following heatmap. From the results shown below, we can see that:
+									<ul class="alt">
+										<li style = "text-align: justify;">Across the entire time period, nonen of the factors alone seems to have a strong correlation with the S&P 500 sectors </li>
+										<li style = "text-align: justify;">The relationship between commodity index and the eleven sectors varies from 0.00 to 0.25, indicating a weak positive relationship.</li>
+										<li style = "text-align: justify;">There seems to be a relatively strong negative relationship between commodity index and US dollar index</li>
+									</ul>
+								</p>
+								Given the three findings listed above, we believe in order to make better use of the factors we were given to help us predicting sector return and further adjusting sector weights, we should start our following analysis from two aspects.
+								First, adjusting the constant testing period to a rolling one and see whether we can observe a more applicable correlation which can help us making predictions. Second, including the interations among the four factors when constructing our prediction model.
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 1: Full Sample Correlation Heatmap</b></figcaption>
+									<img src="images/corr_heatmap.png"
+										 alt="Full Sample Correlation Heatmap"
+										 style="width: 80%;"/>
+								</figure>
+								
+								
+								<h3>3.2 Rolling Correlation </h3>
+								<p>
+									We started by estimating the rolling correlation between each pair of the variables using three window sizes, which are 6-month, 12-month, and 36-months. Generally speaking, as the window size increases, the magnitude of the correlations diminishes, but the patterns didn't change too much. 
+									We first focus on visualizing the 36-month correlation between BCOM and S&P 500 eleven sectors since commodity index is our primary variable of interest, and setting the window size to 36 will eliminate most of the noise in the data, which can give us a much clear pattern to study.
+									<ul class="alt">
+										Here are some findings we summarized from the 36-month rolling correlation:
+										<li style = "text-align: justify;">For the majority of time, the Financial sector and industrial sector are positively correlated with BCOM </li>
+										<li style = "text-align: justify;">The relationship between consumer discretionary sector and BCOM stays constant around zero, other then a obvious positive period around 2008 to 2015</li>
+										<li style = "text-align: justify;">For consumer staple sector and utility sector, there's a U shape in the their respective correlation between 1998 and 2008, while after 2011, the relationship diminishes notably</li>
+										<li style = "text-align: justify;">There's seem to have a mild upward trend in the correlation between Real Estate sector and BCOM. And before 2008, this relationship is mostly negative, while after 2008, it shifts towards positive </li>
+										<li style = "text-align: justify;">Similar to Real Estate sector, the correlation Energy sector and BCOM turns to mostly positive after 2008, however, without an overall long-term trend shown in the figure </li>
+									
+									</ul>
+								</p>
+								<meta name="viewport" content="width=device-width, initial-scale=1">
+								<style>
+									body {
+										/* font-family: Arial;*/
+										margin: 0;
+									}
+									
+									* {
+										box-sizing: border-box;
+									}
+									
+									img {
+										vertical-align: middle;
+										
+									}
+									
+									/* Position the image container (needed to position the left and right arrows) */
+									.mycontainer1 {
+										position: relative;
+									}
+									
+									/* Hide the images by default */
+									.mySlides {
+										display: none;
+									}
+									
+									/* Add a pointer when hovering over the thumbnail images */
+									.cursor {
+										cursor: pointer;
+									}
+									
+									/* Next & previous buttons */
+									.prev,
+									.next {
+										cursor: pointer;
+										position: absolute;
+										top: 40%;
+										width: auto;
+										padding: 16px;
+										margin-top: -50px;
+										color: white;
+										font-weight: bold;
+										font-size: 20px;
+										border-radius: 0 3px 3px 0;
+										user-select: none;
+										-webkit-user-select: none;
+									}
+									
+									/* Position the "next button" to the right */
+									.next {
+										right: 0;
+										border-radius: 3px 0 0 3px;
+									}
+									
+									/* On hover, add a black background color with a little bit see-through */
+									.prev:hover,
+									.next:hover {
+										background-color: rgba(0, 0, 0, 0.8);
+									}
+									
+									/* Number text (1/3 etc) */
+									.numbertext {
+										color: #f2f2f2;
+										font-size: 12px;
+										padding: 8px 12px;
+										position: absolute;
+										top: 0;
+									}
+									
+									/* Container for image text */
+									.caption-container {
+										text-align: center;
+										background-color: rgb(64, 62, 62);
+										padding: 2px 8px;
+										color: white;
+									}
+									
+									.row:after {
+										
+										content: "";
+										display: table;
+										clear: both;
+									}
+									
+									/* Six columns side by side */
+									.column {
+										
+										float: left;
+										width: 16.66%;
+									}
+									
+									/* Add a transparency effect for thumnbail images */
+									.demo {
+										opacity: 0.6;
+									}
+									
+									.active,
+									.demo:hover {
+										opacity: 1;
+									}
+								</style>
+								<div class="mycontainer1">
+									
+									<div class="mySlides">
+										<img src="images/financials.png" style="width:100%">
+									</div>
+									
+									<div class="mySlides">
+									  	<img src="images/materials.jpg" style="width:100%">
+									</div>
+									
+									<div class="mySlides">
+									  	<img src="images/industrials.png" style="width:100%">
+									</div>
+									  
+									<div class="mySlides">
+									 	<img src="images/CDs.png" style="width:100%">
+									</div>
+									
+									<div class="mySlides">
+									  	<img src="images/CSs.png" style="width:100%">
+									</div>
+									
+									<div class="mySlides">
+									  	<img src="images/HCs.png" style="width:100%">
+									</div>
+								
+									<div class="mySlides">
+									  	<img src="images/ITs.png" style="width:100%">
+									</div>
+
+									<div class="mySlides">
+										<b></b>
+									  	<img src="images/Comms.png" style="width:100%">
+									</div>
+
+									<div class="mySlides">
+									  	<img src="images/Utilities.png" style="width:100%">
+									</div>
+
+									<div class="mySlides">
+									  	<img src="images/RealEstates.png" style="width:100%">
+									</div>
+									
+									<div class="mySlides">
+									  	<img src="images/Energys.png" style="width:100%">
+									</div>
+									  
+									<a class="prev" onclick="plusSlides(-1)">❮</a>
+									<a class="next" onclick="plusSlides(1)">❯</a>
+									
+									<div class="caption-container">
+										<p id="caption"></p>
+									</div>
+								
+									<div class="row">
+										<div class="column">
+										  	<img class="demo cursor" src="images/financials.png" style="width:100%" onclick="currentSlide(1)" alt="1/11 - Financials Sector Rolling Correlation with BCOM">
+										</div>
+										<div class="column">
+										  	<img class="demo cursor" src="images/materials.png" style="width:100%" onclick="currentSlide(2)" alt="2/11 - Materials Sector Rolling Correlation with BCOM">
+										</div>
+										<div class="column">
+										  	<img class="demo cursor" src="images/industrials.png" style="width:100%" onclick="currentSlide(3)" alt="3/11 - Industrials Sector Rolling Correlation with BCOM">
+										</div>
+										<div class="column">
+										  	<img class="demo cursor" src="images/CDs.png" style="width:100%" onclick="currentSlide(4)" alt="4/11 - Consumer Discretionary Sector Rolling Correlation with BCOM">
+										</div>
+										<div class="column">
+										  	<img class="demo cursor" src="images/CSs.png" style="width:100%" onclick="currentSlide(5)" alt="5/11 - Consumer Staples Sector Rolling Correlation with BCOM">
+										</div>    
+										<div class="column">
+										  	<img class="demo cursor" src="images/HCs.png" style="width:100%" onclick="currentSlide(6)" alt="6/11 - Health Care Sector Rolling Correlation with BCOM">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/ITs.png" style="width:100%" onclick="currentSlide(7)" alt="7/11 - Information Technology Sector Rolling Correlation with BCOM">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/Comms.png" style="width:100%" onclick="currentSlide(8)" alt="8/11 - Telecommunication Services Sector Rolling Correlation with BCOM">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/Utilities.png" style="width:100%" onclick="currentSlide(9)" alt="9/11 - Utilities Sector Rolling Correlation with BCOM">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/RealEstates.png" style="width:100%" onclick="currentSlide(10)" alt="10/11 - Real Estate Sector Rolling Correlation with BCOM">
+										</div>
+										<div class="column">
+											<img class="demo cursor" src="images/Energys.png" style="width:100%" onclick="currentSlide(11)" alt="11/11 - Energy Sector Rolling Correlation with BCOM">
+										</div>
+									</div>
+									
+								</div>
+								<script>
+									let slideIndex = 1;
+									showSlides(slideIndex);
+									
+									function plusSlides(n) {
+									  showSlides(slideIndex += n);
+									}
+									
+									function currentSlide(n) {
+									  showSlides(slideIndex = n);
+									}
+									
+									function showSlides(n) {
+									  let i;
+									  let slides = document.getElementsByClassName("mySlides");
+									  let dots = document.getElementsByClassName("demo");
+									  let captionText = document.getElementById("caption");
+									  if (n > slides.length) {slideIndex = 1}
+									  if (n < 1) {slideIndex = slides.length}
+									  for (i = 0; i < slides.length; i++) {
+										slides[i].style.display = "none";
+									  }
+									  for (i = 0; i < dots.length; i++) {
+										dots[i].className = dots[i].className.replace(" active", "");
+									  }
+									  slides[slideIndex-1].style.display = "block";
+									  dots[slideIndex-1].className += " active";
+									  captionText.innerHTML = dots[slideIndex-1].alt;
+									}
+									</script>
+
+								<!-- Regression -->
+								<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+								</br>
+								<h2 style="text-align: center;">Part IV: Traditional Regression Analysis</h2>
+								<h3>4.1 Linear Regression</h3>
+								<p>
+									After conducting the correlational analysis, we started to build predictive models to forecast the sector returns, and using the results to construct monthly portfolio.
+									To begin with, we used the simple regression equation to predict sector returns using the four indexes we have. To avoid looking forward bias, we lagged all the independent indexes before fitting our model. 
+									Following are a few problems regarding the model setting we have considered and discussed throughout our analysis.
+								</p>
+								<b>1. Univariate and Multivariate Regression</b>
+								<p>
+									Since our primary objective is to study how the commodity index might help us in equity allocation, we suppose it's a good idea to build a univariate regression model first to study the relationship between commodity index with each sector, 
+									which can give some indication as to which sector is more sensitive to the change of commodity price.
+								</p>
+
+								<p style="width: 100%;">
+									 $$ {\%&#8710;{Sector Price}_{i,t+1} = \alpha_{i} + \beta_{i}\%&#8710;{BCOM}_{t} } \quad[1]$$
+								</p>
+								<p>
+									Then we would include the other three indexes to our analysis and examine whether and how they might help improve the prediction accuracy.
+								</p>
+								<p style="width: 100%;">
+									$$ {\%&#8710;{Sector Price}_{i,t+1} = \alpha_{i} + \beta_{1i}\%&#8710;{BCOM}_{t} +  \beta_{2i}\%&#8710;{CPI}_{t} + \beta_{3i}\%&#8710;{PMI}_{t} + \beta_{4i}\%&#8710;{DXY}_{t} } \quad[2]$$
+								</p>
+								<b>2. Fixed Regression and Rolling Regression</b>
+								<p>
+									The results of the rolling correlation seem to tell us that  the magnitude of correlation between sector returns and the percentage change in the indexes diminishes. 
+									As a result, we are curious about adopting the method of rolling regression and testing whether it can improve the fixed regression predicting accuracy. For the purpose of comparison, 
+									we first divide the data into training samples and testing samples. Using the first two-thirds training data to estimate the coefficient and making predictions on the entire dataset.</br>
+									Considering the rolling regression, we assume both 6 months and 12 months seem like a reasonable prediction period, so we decided to study both periods and compare the forecasting accuracy. 
+									Figure 3 depicts the function we constructed for rolling regression, we take the first 6 months or 12 months to be our rolling window, and the lag one month to be our out of sample date to test it. 
+									And we continue to roll the data until we reach the end of the data. Compared with the static method, the rolling one only uses the newest information to do the regression, which we hope can have a more profound impact on the sectors' returns.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 3: Moving Forward Regression</b></figcaption>
+									<img src="images/FP_moving_forward_pred.png"
+										 alt="Moving Forward Regression"
+										 style="width: 60%;"/>
+								</figure>
+								<b>3. PCA for dimension reduction</b>
+								<p>
+									One problem with the rolling method is that each time we only have six or twelve data as training samples, compared with the number of factors, the extremely small sample size could possibly render the regression model useless, 
+									especially if we want to add more interaction variables to the equation. So, now we are considering using PCA to reduce the dimensionality for our independent variables. When applying PCA to the dataset, 
+									we created a function to find the number of components that can explain a certain threshold of variance in our data. In our case, we set the threshold to be 85%.
+								</p>
+								<h3>4.2 Weighting Scheme</h3>
+								<p>
+									Our goal is to get the return of each sector, and then use the predicted returns to adjust the weights of different sectors. Specifically, we created a list of evenly spaced weights ranging from -1/n to 1/n, where n is the number of sectors in each month. 
+									Based on the ranking of the predicted sector return, we readjust the order of this list. Then we made adjustments based on the original S&P 500 weight to construct our portfolio, giving the higher ranking the higher weights. After we get the adjusted weights, 
+									we multiply it by the actual return to get the adjusted portfolio returns, and then compare it with our benchmark, SP 500.
+								</p>
+								<h3>4.3 Method Comparison</h3>
+								<b>1. Fixed Regression</b>
+								<p>
+									As shown in Table 2, the R-squared of 11 sectors increases a lot after adding the independent variables. When it comes to the Adj R-squared, we found that the situation is very different in each sector. For almost half of the sectors, 
+									adding can help it improve the fitting ability. Combined with the adj R-squared and the realistic situation, we assume that all the indexes should play a role in the change of returns of different sectors. So in the following analysis, 
+									we will mainly focus on the situation of multivariate regression. At the same time, we will bring it to mind when doing the rolling regression to see whether we will find a reasonable explanation for this situation.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table 2: Fixed Regression Result Comparison</b></figcaption>
+									<img src="images/FP_fixed_reg.png"
+										 alt="Fixed Regression Result Comparison"
+										 style="width: 60%;"/>
+								</figure>
+								<p>
+									From the following table, we can see that adjusted weights have helped us increase the mean, but not efficiently decrease the volatility. For the cumulative return, our portfolio has an obvious advantage over our benchmark portfolio.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table 3: Multivariate Fixed Regression Portfolio Statistics</b></figcaption>
+									<img src="images/FP_fixed_stat.png"
+										 alt="Multivariate Fixed Regression Portfolio Statistics"
+										 style="width: 50%;"/>
+								</figure>
+								</br>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 4: Multivariate Fixed Regression Monthly Portfolio Comparison</b></figcaption>
+									<img src="images/FP_multifix_accum.png"
+										 alt="Multivariate Fixed Regression Monthly Portfolio Comparison"
+										 style="width: 80%;"/>
+								</figure>
+								<b>2. Rolling Regression</b>
+								<p>(1) Regression Result</br>
+									Univariate Regression
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table 4: Univariate Regression comparison</b></figcaption>
+									<img src="images/FP_unirolling_compare.png"
+										 alt="Univariate Regression comparison"
+										 style="width: 60%;"/>
+								</figure>
+								<p>
+									From table 4 we can see that the R-squared improves when the rolling window decreases from 12 month to 6 month, while the RMSE stays consistent.
+								</p></br>
+								<p> Multivariate Regression</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table5: Multivariate Regression comparison</b></figcaption>
+									<img src="images/FP_mulrolling_compare.png"
+										 alt="Multivariate Regression comparison"
+										 style="width: 60%;"/>
+								</figure>
+								<p>
+									This table also indicates that the shorter time period's R-squared is bigger than these of the 12-month. From the perspective of R-squared, we decide to use 6 month as our rolling window when we add the pca into our regression.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table6: Multivariate Regression comparison with interactions</b></figcaption>
+									<img src="images/FP_mulrolling_inter_compare.png"
+										 alt="Multivariate Regression comparison with interactions"
+										 style="width: 60%;"/>
+								</figure>
+								<p>
+									The regression with the interactions has worse fitting, even though we have added one another independent variable into the regression, the R-squared decreases.
+								</p>
+								<p>(2) Portfolio Performance</br>
+									Training Sample = 6
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table7: Multivariate Fixed Regression Portfolio Statistics(T=6)</b></figcaption>
+									<img src="images/FP_fixt6_stat.png"
+										alt="Multivariate Fixed Regression Portfolio Statistics(T=6)"
+										style="width: 30%;"/>
+								</figure>
+								</br>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 5: Multivariate Rolling Regression Portfolio Comparison</b></figcaption>
+									<img src="images/FP_port_accumt6.png"
+										alt="Multivariate Rolling Regression Portfolio Comparison"
+										style="width: 80%;"/>
+								</figure>
+								<p>Training Sample = 12</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table 8: Multivariate Rolling Regression Portfolio Statistics(T=12)</b></figcaption>
+									<img src="images/FP_roll_t12stat.png"
+										alt="Multivariate Rolling Regression Portfolio Statistics(T=12)"
+										style="width: 30%;"/>
+								</figure>
+								</br>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 6: Multivariate Rolling Regression Portfolio Comparison</b></figcaption>
+									<img src="images/FP_port_accumt12.png"
+										alt="Multivariate Rolling Regression Portfolio Comparison"
+										style="width: 80%;"/>
+								</figure>
+								</br>
+								<table>
+									<caption><b>Table 9: Rolling Comparison</b></caption>
+									<tbody>
+										<tr>
+											<td><b></b></td>
+											<td><b>Benchmark</b></td>
+											<td><b>t=6</b></td>
+											<td><b>t=12</b></td>
+										</tr>
+										<tr >
+											<td>Excess return</td>
+											<td></td>
+											<td>0.0002387</td>
+											<td>0.000786</td>
+										</tr>
+										<tr >
+											<td>Tracking error</td>
+											<td></td>
+											<td>0.058</td>
+											<td>0.011</td>
+										</tr>
+										<tr>
+											<td>Average IR</td>
+											<td></td>
+											<td> 0.0712</td>
+											<td>0.423</td>
+										</tr>
+										<tr>
+											<td>Average Sharpe Ratio</td>
+											<td></td>
+											<td> 0.11</td>
+											<td>0.126</td>
+										</tr>
+										<tr>
+											<td>Hit Rate</td>
+											<td></td>
+											<td>0.5127</td>
+											<td>0.493</td>
+										</tr>
+										<tr>
+											<td>MDD</td>
+											<td>-4.5633</td>
+											<td>-4.2355</td>
+											<td>-5.217</td>
+										</tr>
+									</tbody>
+								</table>
+								<p>
+									Comparing Figure 5 with Figure 6, we can see that even if T=6 has a bigger R-squared, the cumulative return doesn't beat the return when rolling window is equal to 12. 
+									Also the comparison of financial statistics can not tell us that the shorter rolling window has the advantage of predicting the return hence help us to adjust the weights.</br>
+									We have consulted relevant statistical data, which shows that R-squared will be affected by the amount of data. When the data pool is small, it may not be very stable. 
+									Therefore, the R-squared of 6 months is better than that of 12 months, probably because the number of samples in the calculation increases in the 12 months, leading to the decline of R2.</br>
+									And due to the limitation of the data sample when doing the rolling regression, we cannot draw a conclusion that the rolling regression with higher R2 is better than fixed regression. 
+									After comparing those cumulative returns, we think that 6/12 did not improve portfolio performance due to unfair comparison.</br>
+									In order to see whether the rolling method could help us improve the portfolio, we decided to set both the training date and the rolling window to be the same, 
+									which is the  first one/two thirds of our data and then compare their cumulative return to see if there is an improvement.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 7: Rolling with Longer Training Period</b></figcaption>
+									<img src="images/FP_port_rollingt216.png"
+										alt="Rolling with Longer Training Period(t=216)"
+										style="width: 80%;"/>
+								</figure>
+								<figure style="text-align: center; position:static;">
+									<img src="images/FP_port_rolling108.png"
+										alt="Rolling with Longer Training Period(t=108)"
+										style="width: 80%;">
+								</figure>	
+								<p>
+									<b>3. Conclusion</b>
+									<ul class="alt">
+										<li style = "text-align: justify;">Don't trust R2 when the training sample is limited, especially when you need to compare two methods that the number of data using to calculate the R2 varies widely. </li>
+										<li style = "text-align: justify;">Rolling can improve, it may be due to that rolling can help us to put the newest information, hence the data into regression, which has the greatest impact on the capital market, and different sectors will react to the latest news in the market.</li>
+										<li style = "text-align: justify;">Pick the best one for regression analysis-Rolling and training data =216 </br>
+																			And the adjusted weights for the 11 sectors of the last out of sample is </br>
+																			[-0.014,  0.13 ,  0.098,  0.012,  0.153,  0.155,  0.211,  0.006,  0.026,  0.096,  0.127]
+										</li>
+									</ul>	
+								</p>
+
+
+								<!-- Decision Tree -->
+								<h2 style="text-align: center;">Part V: Decision Trees</h2>
+								<p>
+									In this section, we tested the use of a non-traditional algorithm, Decision Tree Model, for active equity allocation, and compared the result from Decision Tree model to that from the traditional method. 
+									Using the decision tree model, we can set up a classification system to predict the future outcome for all the sectors included in S&P 500 based on a set of decision rules constructed by the independent indicators we choose to use.
+								</p>
+								<h3>5.1 Model Settings</h3>
+								<b>1. Classification vs. Regression Tree</b>
+								<p>
+									In our case, one problem of using machine learning methods is insufficient data. Given that we only have a total of 327 monthly data, it is likely that our model memorizes the pattern of the data instead of learning intrinsic characteristics hidden behind, 
+									which leads to high accuracy in the training set and poor performance in the testing dataset. To reduce overfitting as much as we can, we decide to use the sign instead of the absolute value for both independent and dependent variables and build a classification tree model.</br>
+									For the four independent factors we have, we first calculated the monthly percentage change, then if the change is positive, we would encode it as one, otherwise as zero.
+								</p>	
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table 10: Independent Indicators</b></figcaption>
+									<img src="images/FP_tree_data.png"
+										alt="Independent Indicators"
+										style="width: 45%;"/>
+								</figure>
+								</br>
+								<p>
+									For the eleven sectors, we calculated the sector return as we did when using the traditional regression, then we compare that with the return of S&P 500, if the sector outperforms S&P 500, we encode it as one, otherwise as zero.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table 11: Target Sectors</b></figcaption>
+									<img src="images/FP_tree_data2.png"
+										alt="Dependent Indicators"
+										style="width: 65%;"/>
+								</figure>
+								</br>
+								<b>2. Rolling vs. Fixed Model</b>
+								<p>
+									In this section, we focus on building a constant decision tree model as opposed to the walking forward prediction method. More specifically, we divide our data into two sections: the training set(in-sample) contains the first 
+									two-thirds of the data ranging from <b>1995-02-28 to 2013-03-31</b>, and the testing set(out-of-sample) is made up of the rest one-third of data ranging from 2013-04-30 to 2022-03-31. 
+									Then, we used the training dataset to find the decision rules and make predictions for both in-sample and out-of-sample data.</br>
+									There are two reasons behind our choice. First, as mentioned above, we are trying to avoid overfitting in our analysis, and increasing the training sample size will be helpful. 
+									Second, dynamic modeling means that each month we need to reconstruct the decision tree and decision rules are varying constantly. It can be difficult to provide a solid explanation to back up our mathematical result. Moreover, it's less applicable to draw conclusions from the monthly-shifting models.
+								</p>
+								<b>3. Splitting Algorithm</b>
+								<p>
+									When choosing the splitting algorithm, we choose to use the absolute excess return to estimate the gini impurity. At each splitting node, we iterate through the four classifiers and based on the sign of each classifier dividing each sector into two sets of returns. After that, for each set, we use the following formula to find the weighted gini value of the 11 sectors.
+								</p>
+								<p style="width: 100%;">
+									$$ {Gini = 1 - (\frac{P}{P+N})^2 + (\frac{N}{P+N})^2 } \quad[3]$$
+									P is the absolute value of the sum of positive excess returns</br>
+									N is the absolute value of the sum of negative excess returns
+							   	</p>
+								<p>
+									After we have the gini index for each sector for both sets of return, we can have the gini index for each of the possible splitting classifiers using the equation below. Then we can choose the classifier that gives us the lowest overall gini value at each splitting point.
+								</p>
+								<p style="width: 100%;">
+									$$ {Overall Gini = 1 - \frac{1}{11}\sum_{i=1}^{11}\frac{A}{A+B}Gini_{above} + \frac{B}{A+B}Gini_{below} } \quad[4]$$
+									A is the absolute value of the sum of excess returns in set1</br>
+									B is the absolute value of the sum of excess returns in set2
+							   	</p>
+								<p>
+									<a href="https://github.com/jessieDu314/Project_Log/blob/main/Equity%20Allocation/Step4_DecisionTree_Port_final.ipynb" class="logo">>View Code Details of the Decision Tree Algorithm</a>
+								</p>
+								<h3>5.2 Portfolio Construction</h3>
+								<b>1. Weighting Scheme</b>
+								<p>
+									As what we did in section 4, here we still use the original weights for all the sectors in S&P 500 to be the base weights and adjust accordingly.</br>
+									From our classification tree model, we can obtain two different pieces of information. One is the predicted signal which suggests whether this sector will outperform or underperform S&P 500, 
+									another is the gini index associated with each sector, indicating how accurate this prediction is. Given the information we have, we designed two weighting strategies to construct our portfolio.
+									First, we simply use the predicted signal to adjust sector weights. For all the sectors predicted to outperform the S&P 500, we will increase their weights by a same amount, calculated using equation below. 
+									Similarly, for the sectors predicted to be the underperforming sectors, we would subtract a number from the base weight.
+								</p>
+								<p style="width: 100%;">
+									$$ {\text{Weighting increase} = 1 - \frac{1}{11}(\text{Number of Underperform Sectors})} \quad[5]$$
+									$$ {\text{Weighting decrease} = 1 - \frac{1}{11}(\text{Number of Outperform Sectors})} \quad[6]$$
+							   	</p> 
+								<p>
+									Then, we want to include the other output we have in adjusting the weight of each sector. In this case, instead of giving the same lift to all the outperforming sectors and the same downgrade to all the underperforming sectors, we readjust the weights using the gini index. 
+									Within each group, we would give the sectors with smaller gini index a higher weight and give lower weight to sectors having relatively larger gini index. To make the two strategies comparable, we also made sure that the two sets of adjusted weights have the same mean.
+								</p>
+								<b>2. Portfolio Comparison</b>
+								<p>
+									From the histogram and the summary statistical table below, we can see that both portfolios we constructed perform better than S&P 500 in terms of both return and standard deviation. And the second portfolio we built using the gini index performs slightly better than the first one. 
+									However, we also noticed that for both of the portfolios, the out-of-sample result outruns its in-sample counterpart.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 8: Histogram of Monthly Return Comparison</b></figcaption>
+									<img src="images/FP_monthly_hist.png"
+										alt="Histogram of Monthly Return Comparison"
+										style="width: 80%;"/>
+								</figure>					
+								<table>
+									<caption><b>Table 12: Monthly Return Comparison</b></caption>
+									<tbody>
+										<tr>
+											<td rowspan="2">&nbsp;</td>
+											<td colspan="3"><b>Full Sample</b></td>
+											<td colspan="3"><b>In-Sample</b></td>
+											<td colspan="3"><b>Out-of-Sample</b></td>
+						
+										</tr>
+										<tr>
+											<td>S&P 500</td>
+											<td>Port1</td>
+											<td>Port2</td>
+											<td>S&P 500</td>
+											<td>Port1</td>
+											<td>Port2</td>
+											<td>S&P 500</td>
+											<td>Port1</td>
+											<td>Port2</td>
+										</tr>
+										<tr>
+											<td>Mean</td>
+											<td>0.0075</td>
+											<td>0.0108</td>
+											<td>0.0112</td>
+											<td>0.0064</td>
+											<td>0.0104</td>
+											<td>0.0108</td>
+											<td>0.009</td>
+											<td>0.0115</td>
+											<td>0.0119</td>
+										</tr>
+										<tr>
+											<td>Standard Deviation</td>
+											<td>0.0435</td>
+											<td>0.0469</td>
+											<td>0.0469</td>
+											<td>0.0451</td>
+											<td>0.0501</td>
+											<td>0.0500</td>
+											<td>0.040</td>
+											<td>0.0398</td>
+											<td>0.0400</td>
+										</tr>
+										<tr>
+											<td>Min</td>
+											<td>-0.1694</td>
+											<td>-0.1734</td>
+											<td>-0.1683</td>
+											<td>-0.1694</td>
+											<td>-0.1734</td>
+											<td>-0.1683</td>
+											<td>-0.1251</td>
+											<td>-0.1134</td>
+											<td>-0.1089</td>
+										</tr>
+										<tr>
+											<td>Max</td>
+											<td>0.1268</td>
+											<td>0.1377</td>
+											<td>0.1400</td>
+											<td>0.1077</td>
+											<td>0.1377</td>
+											<td>0.1400</td>
+											<td>0.1268</td>
+											<td>0.1335</td>
+											<td>0.1346</td>
+										</tr>
+									</tbody>
+								</table>
+								<p>
+									Moreover, we used the following measurements listed in Table# to compare the portfolio performance for the entire time period, and for the training and testing period respectively.</br>
+									<b>Across the entire time period,</b> the second portfolio we built has a higher Excess Return, Information Ratio and Sharpe Ratio compared with the first one. 
+									And a smaller Maximum Drawdown indicates the second portfolio can better manage risk than the first one. The tracking error for the second portfolio is somewhat higher, 
+									however since the tracking error only measures how much our portfolio deviates from the benchmark, this does not necessarily equal riskier investment. 
+									Then we made comparisons horizontally, <b>between the in-sample period and the out-of-sample period.</b> The results tell a similar story, the second portfolio still outran the first one, while in the out-of-sample data, 
+									the excess return for both portfolios have a much smaller magnitude. In addition, we noticed that the Information Ratio for both portfolios have become smaller, while the Sharpe Ratio shows an opposite change. 
+									This seems counterintuitive since both ratios measure the risk adjusted return for a given security. One possible explanation we could come up with is that the performance of our benchmark, S&P 500, also changes in terms of both average return and index volatility. 
+									Because Information Ratio measures the risk-adjusted return relative to the benchmark, while Sharpe Ratio compares to the constant risk-free rate, this difference might be responsible for the results we have here.
+								</p>
+								<table>
+									<caption><b>Table 13: Portfolio Comparison</b></caption>
+									<tbody>
+										<tr>
+											<td rowspan="2", style="text-align:center; vertical-align: middle;"><b>Annual Measures</b></td>
+											<td colspan="3"><b>Full Sample</b></td>
+											<td colspan="3"><b>In-Sample</b></td>
+											<td colspan="3"><b>Out-of-Sample</b></td>
+						
+										</tr>
+										<tr>
+											<td>S&P 500</td>
+											<td>Port1</td>
+											<td>Port2</td>
+											<td>S&P 500</td>
+											<td>Port1</td>
+											<td>Port2</td>
+											<td>S&P 500</td>
+											<td>Port1</td>
+											<td>Port2</td>
+										</tr>
+										<tr>
+											<td>Excess Return</td>
+											<td></td>
+											<td>0.0033</td>
+											<td>0.0037</td>
+											<td></td>
+											<td>0.0041</td>
+											<td>0.0045</td>
+											<td></td>
+											<td>0.0019</td>
+											<td>0.0023</td>
+										</tr>
+										<tr>
+											<td>Tracking Error</td>
+											<td></td>
+											<td>0.0098</td>
+											<td>0.0100</td>
+											<td></td>
+											<td>0.0117</td>
+											<td>0.0115</td>
+											<td></td>
+											<td>0.0061</td>
+											<td>0.0070</td>
+										</tr>
+										<tr>
+											<td>Information Ratio</td>
+											<td></td>
+											<td>0.3650</td>
+											<td>0.3808</td>
+											<td></td>
+											<td>0.3861 </td>
+											<td>0.3999 </td>
+											<td></td>
+											<td>0.3288 </td>
+											<td>0.3559 </td>
+										</tr>
+										<tr>
+											<td>Information Coefficient</td>
+											<td></td>
+											<td>0.1006</td>
+											<td>0.1058</td>
+											<td></td>
+											<td>0.0920</td>
+											<td>0.0913</td>
+											<td></td>
+											<td>0.1027</td>
+											<td>0.1263</td>
+										</tr>
+										<tr>
+											<td>Sharpe Ratio</td>
+											<td></td>
+											<td>0.2057 </td>
+											<td>0.2158 </td>
+											<td></td>
+											<td>0.1621 </td>
+											<td>0.1703</td>
+											<td></td>
+											<td>0.2577 </td>
+											<td>0.2735 </td>
+										</tr>
+										<tr>
+											<td>Hit Rate</td>
+											<td></td>
+											<td>0.6288 </td>
+											<td>0.6134 </td>
+											<td></td>
+											<td>0.6376 </td>
+											<td>0.6284</td>
+											<td></td>
+											<td>0.6111 </td>
+											<td>0.5833 </td>
+										</tr>
+										<tr>
+											<td>Maximum Drawdown(%)</td>
+											<td>-456.3</td>
+											<td>-460.9  </td>
+											<td>-431.7 </td>
+											<td>-456.3</td>
+											<td>-460.9 </td>
+											<td>-431.7</td>
+											<td>-281.5</td>
+											<td>-266.7 </td>
+											<td>-279.6 </td>
+										</tr>
+									</tbody>
+								</table>
+								<p>
+									Following is cumulative return for the two adjusted portfolios and for the S&P 500. At the end of the testing period, our second portfolio has outperformed the equally adjusted one, and has tripled the cumulative wealth of S&P 500.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 9: Cumulative Return Comparison</b></figcaption>
+									<img src="images/FP_tree_port_accum.png"
+										alt="Cumulative Return Comparison"
+										style="width: 80%;"/>
+								</figure>
+								<table>
+									<caption><b>Table 14: Next Month Weights Prediction (2022-04-31)</b></caption>
+									<tbody>
+										<tr style="text-align:center;">
+											<td><b>Material</b></td>
+											<td><b>Industrial</b></td>
+											<td><b>Consumer Discretionary</b></td>
+											<td><b>Consumer Staples</b></td>
+											<td><b>Health Care</b></td>
+											<td><b>Financial</b></td>
+											
+										</tr>
+										<tr style="text-align:center;">
+											<td>-0.0191</td>
+											<td>0.1770</td>
+											<td>0.1252</td>
+											<td>0.0658</td>
+											<td>0.1177</td>
+											<td>0.1527</td>
+											
+										</tr>
+										<tr style="text-align:center;">
+											<td><b>IT</b></td>
+											<td><b>Telecom</b></td>
+											<td><b>Utility</b></td>
+											<td><b>Real Estate</b></td>
+											<td><b>Energy</b></td>
+											<td></td>
+										</tr>
+										<tr style="text-align:center;">
+											
+											<td> 0.2865</td>
+											<td>0.0317</td>
+											<td>-0.0074</td>
+											<td>-0.0308</td>
+											<td>0.1006</td>
+											<td></td>
+										</tr>
+									</tbody>
+								</table>
+								<h3>5.3 Tree structure and Findings</h3>
+								<p>
+									After we constructed our portfolio, we studied the structure of the classification tree and decision rules coming with it.
+								</p>
+								<b>1. Factors Ranking</b>
+								<p>
+									As we can see from the figure below, the Consumer Price Index(CPI) is the root node, indicating that for the training data we have, CPI to be the leading classifier compared with the other three in predicting sector returns. 
+									CPI keeps track of the average change in the prices paid by urban consumers for a market basket of consumer goods and services over time, and it's also used as a tool to monitor inflation by the Central Bank and the government. 
+									In our study, we used the monthly percentage of CPI to be the indicator and make predictions. If the change is positive, it indicates an increase in the price of consumer goods and services, in other words, there's a trend of inflation. 
+									And if the change is negative, it reflects a relatively healthier economic condition.</br>
+									As we studied the eleven sectors included in S&P 500, we have found that seven out of the eleven sectors, including Technology, Financials, Energy, Materials, Consumer Discretionary, and Industrials, can be viewed as the cyclical sectors, 
+									meaning they are sensitive to the economic movements. Except for the seven sectors above, the Communications sector in recent years have become more sensitive to economies as well due to the impact coming from the prevailing streaming services. 
+									We assume that this might help explain why CPI plays such a crucial role in making predictions.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 10: Tree Structure and Decision Rules</b></figcaption>
+									<img src="images/FP_tree_structure.png"
+										alt="Tree Structure and Decision Rules"
+										style="width: 75%;"/>
+								</figure>
+								<p>
+									Although the above discussion might provide some explanation why CPI serves as the leading classifier, there's another potential bias we'd like to point out that is caused by multicollinearity in our model. Because we are dealing with time series binary data, 
+									instead of using the spearman correlation, we chose to compare two variables directly and find how many times they move in the same direction over the whole training period. As shown in the Table 14 below, for each two pairs of variables, there's about half of the time they are moving in the same direction at a given month.</br>
+									By its nature, the predictions from decision trees are immune to the problem of multicollinearity. Because as a non-parametric model, it makes no assumptions on the relationship between independent variables, each time when splitting, the model will only choose one feature and classify on that particular feature. However, 
+									studies have shown that when it comes to feature importance and interpretation, multicollinearity can cause a problem. A high correlation will offset the importance of that feature and thus make the feature ranking susceptible.
+								</p>
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Table 15: Correlation between classifiers</b></figcaption>
+									<img src="images/FP_feature_corr.png"
+										alt="Correlation between classifiers"
+										style="width: 40%;"/>
+								</figure>
+								</br>
+								<b>2. Additional Findings</b>
+								<p>
+									In addition to the feature ranking, we also studied the predicting result to help us get a better grasp of the decision rules.</br>
+									Three of the most noticeable rules we identified:</br>
+									<ol >
+										<li type='a'>When DXY = 0, the Materials sector always underperforms the benchmark.</li>
+										<p>In our model, DXY = 0 means that the percentage change of the dollar index is negative, that is to say the value of the US dollar is decreasing. In other words, the Materials sector is less profitable when there is depreciation. Regardless of the cause of the depreciation, 
+										we believe it will lead to unfavorable import prices for the domestic companies and we suspect that this might be responsible for the Materials sector's underperformance.</br>
+										Within the Materials sector, there are five major industries, including Chemicals, Construction Materials, Containers and Packaging, Metals and Mining, and Paper and Forest Products. And among the five industries, Chemicals has always been the largest one, from about 50% in the 90s to 70% in recent years. 
+										Companies belonging to this industry will convert raw materials into industrial chemicals. Since half of the raw materials in the US are imported, when dollars depreciate, it will increase the production cost thus will hurt profit.</p>
+										<li type='a'>When CPI = 1 or PMI = 1, the Utilities Sector is always predicted to underperform S&P 500</li>
+										<p>
+											CPI keeps track of the change in the price paid by customers for consumer goods and services and can be used to measure inflationary level. In our model, when the price is rising, we would set the index as one. So in this case, we know according to the decision rules that when there's a tendency of inflation, 
+											the Utilities sector will underperform our benchmark. We believe it might be because the price of coal and natural gas will go up during inflation, causing the price of electric utilities to increase. Meanwhile, belonging to a part of public service, this sector is heavily regulated by the government and cannot pass the higher input price to customers, thus hurting its profitability.</br>
+											Furthermore, when PMI = 1, suggesting the prevailing direction of economic trends in the manufacturing and service sectors is positive. When it comes to such a time, the Utilities sector also will underperform the S&P 500. Generally speaking, we think this sector is relatively stable in the long run and tends to offer investors a stable dividend with low price volatility. 
+											So when the economy is weak, it might be considered a safe investment. However, when the economy is booming, it may underperform the overall equity markets.
+										</p>
+										<li type='a'>When CPI = 0 and BCOM = 0, the Materials and Energy sector have the same behavior.</li>
+										<p>
+											In general, we think this connection between these two sectors is likely to be observed. Companies in the materials sector engage in the manufacturing or processing of chemicals and plastics, harvest forests or extract metals and minerals. And they will supply the materials products to other industries. For example, whenever the Energy sector experiences an energy transition, 
+											it might suddenly require large amounts of new materials to support such transition or need more steel to build new infrastructures for the new energy production. According to our model, trained from the data we have, this kind of relationship seems to be stronger when the commodity price is dropping or there's a tendency for deflation.
+										</p>
+									  </ol>  
+								</p>
+								<!-- Conclusion -->
+								<h2 style="text-align: center;">Part VI: Conclusion</h2>
+								<h3>6.1 Comparing between traditional and non-traditional methods</h3>
+								<p>
+									Finally, we took the winner from the traditional and non-traditional method respectively and compared portfolio performance built upon. From the table below, we can see that the decision tree model can improve the annual excess return by 53% compared to the traditional method with a lower risk level, indicated by the annual maximum drawdown. 
+									And this comparison is between the dynamic traditional model and the constant machine learning model, so we suspect that incorporating the rolling method into the non-traditional method also further improves the result, which might be worth further research.
+								</p>
+								<table>
+									<caption><b>Table 16: Two Method portfolio Comparison</b></caption>
+									<tbody>
+										<tr style="text-align:center;">
+											<td rowspan="2", style="vertical-align: middle;"><b>Annual Measures</b></td>
+											<td colspan="2"><b>Out-of-sample</b></td>
+										</tr>
+										<tr style="text-align:center;">
+											<td><b>Rolling Regression</b></td>
+											<td><b>Fixed Decision Tree</b></td>
+										</tr>
+										<tr style="text-align:center;">
+											<td>Excess Return</td>
+											<td>0.0015</td>
+											<td>0.0023</td>
+										</tr>
+										<tr style="text-align:center;">
+											<td>Tracking Error</td>
+											<td>0.0069</td>
+											<td>0.0070</td>
+										</tr>
+										<tr style="text-align:center;">
+											<td>Information Ratio</td>
+											<td>0.1476</td>
+											<td>0.3559 </td>
+										</tr>
+										<tr style="text-align:center;">
+											<td>Information Coefficient</td>
+											<td>0.0533</td>
+											<td>0.1263</td>
+										</tr>
+										<tr style="text-align:center;">
+											<td>Sharpe Ratio</td>
+											<td>0.245</td>
+											<td>0.2735 </td>
+										</tr>
+										<tr style="text-align:center;">
+											<td>Hit Rate</td>
+											<td>0.536</td>
+											<td>0.5833</td>
+										</tr>
+										<tr style="text-align:center;">
+											<td>Maximum Drawdown(%)</td>
+											<td>-288.3</td>
+											<td>-279.6</td>
+										</tr>
+									</tbody>
+								</table>
+								
+
+								<figure style="text-align: center; position:static;">
+									<figcaption><b>Figure 11: Out-Of-Sample Cumulative Return Comparison</b></figcaption>
+										<div class="imagerow">
+											<div class="imagecolumn">
+												<img src="images/FP_conclusion_tree.png" alt="Out-Of-Sample Cumulative Return Tree" style="width:100%">
+											</div>
+											<div class="imagecolumn">
+												<img src="images/FP_conclusion_reg.png" alt="Out-Of-Sample Cumulative Return Regression" style="width:91%">
+											</div>
+										</div>
+								</figure>
+								<!-- <p>jtyug</p>-->
+							</section>
+					</div>
+
+				<!-- Footer -->
+				<footer id="footer">
+
+					<section class="split contact">
+						<section class="alt">
+							<h3>Location</h3>
+							<p>Waltham, MA<br /></p>
+						</section>
+						<section>
+							<h3>Phone</h3>
+							<p>(781) 249-8512</p>
+						</section>
+						<section>
+							<h3>Email</h3>
+							<p><a href="mailto:juandu1124@brandeis.edu">juandu1124@brandeis.edu</a></p>
+						</section>
+						<section>
+							<h3>Social</h3>
+							<ul class="icons alt">
+								<li><a href="https://www.linkedin.com/in/juandu-00416/" class="icon brands alt fa-linkedin"><span class="label">LinkedIn</span></a></li>
+								<li><a href="https://github.com/jessieDu314" class="icon brands alt fa-github"><span class="label">GitHub</span></a></li>
+							</ul>
+						</section>
+					</section>
+				</footer>
+
+				<!-- Copyright -->
+				<div id="copyright">
+					<ul><li>Design: <a href="https://www.linkedin.com/in/juandu-00416/">JessieDu</a></li></ul>
+				</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrollex.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
