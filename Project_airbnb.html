@@ -179,91 +179,8 @@ for i in range(len(tmp2)):
 
 								<!-- Photo gallery -->
 								<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
-								<style>
-									body {
-									font-family: Arial;
-									margin: 0;
-									}
-									* {
-									box-sizing: border-box;
-									}
-									img {
-									vertical-align: middle;
-									}
-									/* Position the image container (needed to position the left and right arrows) */
-									.container1 {
-									position: relative;
-									}
-									/* Hide the images by default */
-									.mySlides {
-									display: none;
-									}
-									/* Add a pointer when hovering over the thumbnail images */
-									.cursor {
-									cursor: pointer;
-									}
-									/* Next & previous buttons */
-									.prev,
-									.next {
-									cursor: pointer;
-									position: absolute;
-									top: 40%;
-									width: auto;
-									padding: 16px;
-									margin-top: -50px;
-									color: white;
-									font-weight: bold;
-									font-size: 20px;
-									border-radius: 0 3px 3px 0;
-									user-select: none;
-									-webkit-user-select: none;
-									}
-									/* Position the "next button" to the right */
-									.next {
-									right: 0;
-									border-radius: 3px 0 0 3px;
-									}
-									/* On hover, add a black background color with a little bit see-through */
-									.prev:hover,
-									.next:hover {
-									background-color: rgba(0, 0, 0, 0.8);
-									}
-									/* Number text (1/3 etc) */
-									.numbertext {
-									color: #f2f2f2;
-									font-size: 12px;
-									padding: 8px 12px;
-									position: absolute;
-									top: 0;
-									}
-									/* Container for image text */
-									.caption-container {
-									text-align: center;
-									background-color: #222;
-									padding: 2px 16px;
-									color: white;
-									}
-									.row:after {
-									content: "";
-									display: table;
-									clear: both;
-									}
-									/* Six columns side by side */
-									.column {
-									float: left;
-									width: 16.66%;
-									}
-									/* Add a transparency effect for thumnbail images */
-									.demo {
-									opacity: 0.6;
-									}
-									.active,
-									.demo:hover {
-									opacity: 1;
-									}
-								</style>
 								<p style="text-align:center"><b>Tuning hyperparameters</b></p>
-								<div class="container1" >
+								<div class="mycontainer1" >
 									<div class="mySlides">
 										<div class="numbertext">1 / 6</div>
 										<img src="images/dropNA_ridge1.png" style="width:60%;text-align: center" >
@@ -330,21 +247,21 @@ for i in range(len(tmp2)):
 									}
 
 									function showSlides(n) {
-									let i;
-									let slides = document.getElementsByClassName("mySlides");
-									let dots = document.getElementsByClassName("demo");
-									let captionText = document.getElementById("caption");
-									if (n > slides.length) {slideIndex = 1}
-									if (n < 1) {slideIndex = slides.length}
-									for (i = 0; i < slides.length; i++) {
-										slides[i].style.display = "none";
-									}
-									for (i = 0; i < dots.length; i++) {
-										dots[i].className = dots[i].className.replace(" active", "");
-									}
-									slides[slideIndex-1].style.display = "block";
-									dots[slideIndex-1].className += " active";
-									captionText.innerHTML = dots[slideIndex-1].alt;
+										let i;
+										let slides = document.getElementsByClassName("mySlides");
+										let dots = document.getElementsByClassName("demo");
+										let captionText = document.getElementById("caption");
+										if (n > slides.length) {slideIndex = 1}
+										if (n < 1) {slideIndex = slides.length}
+										for (i = 0; i < slides.length; i++) {
+											slides[i].style.display = "none";
+										}
+										for (i = 0; i < dots.length; i++) {
+											dots[i].className = dots[i].className.replace(" active", "");
+										}
+										slides[slideIndex-1].style.display = "block";
+										dots[slideIndex-1].className += " active";
+										captionText.innerHTML = dots[slideIndex-1].alt;
 									}
 								</script>
 									
@@ -445,7 +362,7 @@ ridge_mspe  = np.mean(np.square(Y_test - ridge_pred))
 									img {
 									vertical-align: middle;
 									}
-									.container1 {
+									.mycontainer2 {
 									position: relative;
 									}
 									.mySlides1 {
@@ -478,7 +395,7 @@ ridge_mspe  = np.mean(np.square(Y_test - ridge_pred))
 									background-color: rgba(0, 0, 0, 0.8);
 									}
 									.numbertext {
-									color: #f2f2f2;
+									color: #0f0e0e;
 									font-size: 12px;
 									padding: 8px 12px;
 									position: absolute;
@@ -486,8 +403,8 @@ ridge_mspe  = np.mean(np.square(Y_test - ridge_pred))
 									}
 									.caption-container1 {
 									text-align: center;
-									background-color: #222;
-									padding: 2px 16px;
+									background-color: rgb(64, 62, 62);
+									padding: 2px 8px;
 									color: white;
 									}
 									.row:after {
@@ -510,10 +427,10 @@ ridge_mspe  = np.mean(np.square(Y_test - ridge_pred))
 								</style>
 								
 								<p style="text-align:center"><b>Tuning hyperparameters</b></p>
-								<div class="container1" >
+								<div class="mycontainer2" >
 									<div class="mySlides1">
 										<div class="numbertext">1 / 7</div>
-										<img src="images/fill_pca_response.png" style="width:60%;text-align: center" >
+										<img src="images/fill_pca_response.png" style="width:60%;text-align: center">
 									</div>
 									<div class="mySlides1">
 										<div class="numbertext">2 / 7</div>
@@ -543,8 +460,8 @@ ridge_mspe  = np.mean(np.square(Y_test - ridge_pred))
 										<img src="images/fill_knn_servicefee.png" style="width:60%;text-align: center" >
 									</div>
 									
-									<a class="prev" onclick="plusSlides(-1)">❮</a>
-									<a class="next" onclick="plusSlides(1)">❯</a>
+									<a class="prev" onclick="plusSlides1(-1)">❮</a>
+									<a class="next" onclick="plusSlides1(1)">❯</a>
 
 									<div class="caption-container1">
 										<p id="caption"></p>
@@ -552,59 +469,59 @@ ridge_mspe  = np.mean(np.square(Y_test - ridge_pred))
 
 									<div class="row">
 										<div class="column">
-										<img class="demo cursor" src="images/fill_pca_response.png" style="width:80%" onclick="currentSlide(1)" alt="PCA: response rate">
+											<img class="demo cursor" src="images/fill_pca_response.png" style="width:80%" onclick="currentSlide1(1)" alt="PCA: response rate">
 										</div>
 										<div class="column">
-										<img class="demo cursor" src="images/fill_pca_sub_ratings.png" style="width:80%" onclick="currentSlide(2)" alt="PCA: sub-ratings">
+											<img class="demo cursor" src="images/fill_pca_sub_ratings.png" style="width:80%" onclick="currentSlide1(2)" alt="PCA: sub-ratings">
 										</div>
 										<div class="column">
-											<img class="demo cursor" src="images/fill_knn_cleanfee.png" style="width:80%" onclick="currentSlide(3)" alt="KNN: cleaning fee">
+											<img class="demo cursor" src="images/fill_knn_cleanfee.png" style="width:80%" onclick="currentSlide1(3)" alt="KNN: cleaning fee">
 										</div>
 										<div class="column">
-											<img class="demo cursor" src="images/fill_knn_greview.png" style="width:80%" onclick="currentSlide(4)" alt="KNN: general review">
+											<img class="demo cursor" src="images/fill_knn_greview.png" style="width:80%" onclick="currentSlide1(4)" alt="KNN: general review">
 										</div>
 										<div class="column">
-											<img class="demo cursor" src="images/fill_knn_occufee.png" style="width:80%" onclick="currentSlide(5)" alt="KNN: occupancy fee">
+											<img class="demo cursor" src="images/fill_knn_occufee.png" style="width:80%" onclick="currentSlide1(5)" alt="KNN: occupancy fee">
 										</div>    
 										<div class="column">
-											<img class="demo cursor" src="images/fill_knn_review_number.png" style="width:80%" onclick="currentSlide(6)" alt="KNN review number">
+											<img class="demo cursor" src="images/fill_knn_review_number.png" style="width:80%" onclick="currentSlide1(6)" alt="KNN review number">
 										</div>
 										<div class="column">
-											<img class="demo cursor" src="images/fill_knn_servicefee.png" style="width:80%" onclick="currentSlide(7)" alt="KNN: service fee">
+											<img class="demo cursor" src="images/fill_knn_servicefee.png" style="width:80%" onclick="currentSlide1(7)" alt="KNN: service fee">
 										</div>
 									</div>
 								</div>
-
 								<script>
 									let slideIndex1 = 1;
-									showSlides(slideIndex1);
+									showSlides1(slideIndex1);
 
-									function plusSlides(n) {
-									showSlides(slideIndex1 += n);
-									}
-
-									function currentSlide(n) {
-									showSlides(slideIndex1 = n);
+									function plusSlides1(n) {
+									showSlides1(slideIndex1 += n);
 									}
 
-									function showSlides(n) {
-									let i;
-									let slides = document.getElementsByClassName("mySlides1");
-									let dots = document.getElementsByClassName("demo");
-									let captionText = document.getElementById("caption");
-									if (n > slides.length) {slideIndex1 = 1}
-									if (n < 1) {slideIndex1 = slides.length}
-									for (i = 0; i < slides.length; i++) {
-										slides[i].style.display = "none";
+									function currentSlide1(n) {
+									showSlides1(slideIndex1 = n);
 									}
-									for (i = 0; i < dots.length; i++) {
-										dots[i].className = dots[i].className.replace(" active", "");
-									}
-									slides[slideIndex1-1].style.display = "block";
-									dots[slideIndex1-1].className += " active";
-									captionText.innerHTML = dots[slideIndex1-1].alt;
+
+									function showSlides1(n) {
+										let i;
+										let slides = document.getElementsByClassName("mySlides1");
+										let dots = document.getElementsByClassName("demo");
+										let captionText = document.getElementById("caption");
+										if (n > slides.length) {slideIndex1 = 1}
+										if (n < 1) {slideIndex1 = slides.length}
+										for (i = 0; i < slides.length; i++) {
+											slides[i].style.display = "none";
+										}
+										for (i = 0; i < dots.length; i++) {
+											dots[i].className = dots[i].className.replace(" active", "");
+										}
+										slides[slideIndex1-1].style.display = "block";
+										dots[slideIndex1-1].className += " active";
+										captionText.innerHTML = dots[slideIndex1-1].alt;
 									}
 								</script>
+
 								<pre>
 									<code>
 				# SAMPLE CODE --- Impute Using PCA #
