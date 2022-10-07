@@ -4502,7 +4502,7 @@ input, select, textarea {
 	#copyright {
 		color: #ffffff;
 		position: relative;
-		color: rgba(255, 255, 255, 0.654);
+		color: rgba(255, 255, 255, 0.6);
 		cursor: default;
 		font-family: "Source Sans Pro", Helvetica, sans-serif;
 		font-size: 0.8rem;
